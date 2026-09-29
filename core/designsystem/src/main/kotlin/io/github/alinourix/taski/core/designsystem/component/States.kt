@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -58,6 +59,14 @@ fun EmptyState(
     }
 }
 
+/** A count in the digits of the current language: Persian digits when the app speaks Persian. */
+@Composable
+fun localizedCount(value: Int): String {
+    val text = value.toString()
+    if (LocalConfiguration.current.locales[0].language != "fa") return text
+    return text.map { if (it in '0'..'9') "۰۱۲۳۴۵۶۷۸۹"[it - '0'] else it }.joinToString("")
+}
+
 @Composable
 fun SectionHeader(
     title: String,
@@ -72,7 +81,7 @@ fun SectionHeader(
     ) {
         Text(title, style = MaterialTheme.typography.titleSmallEmphasized, color = MaterialTheme.colorScheme.primary)
         count?.let {
-            Text(it.toString(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(localizedCount(it), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Box(Modifier.weight(1f))
         trailing?.invoke()

@@ -25,6 +25,7 @@
     <string name="board_manage_tags">مدیریت برچسب‌ها</string>
     <string name="board_ascending">صعودی</string>
     <string name="board_descending">نزولی</string>
+    <string name="board_add_task">افزودن تسک</string>
     <string name="board_drop_here">اینجا رها کنید</string>
 
     <string name="group_none">بدون گروه‌بندی</string>

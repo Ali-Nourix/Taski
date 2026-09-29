@@ -98,10 +98,27 @@ Requirements: JDK 17+ and an Android SDK with platform `android-37.1`.
 
 ```bash
 ./gradlew :app:assembleDebug           # app/build/outputs/apk/debug/app-debug.apk
-./gradlew :app:assembleRelease         # R8-minified; signed with the debug key for testing
+./gradlew :app:zipRelease              # signed, R8-minified release: app/build/dist/taski-<version>-release.zip
 ./gradlew test                         # domain rules, repositories, schema checks
 ./gradlew :app:recordRoborazziDebug    # regenerate docs/screenshots
 ```
+
+### Release signing
+
+A signed release builds anywhere, without a key of your own: unless told
+otherwise, releases are signed with the **public example key** in
+[`signing/example-release.jks`](signing/) (alias `taski`, passwords
+`taski-example`). That key is not a secret — anyone can build an APK signed with
+it — so it is for your own phone, not for publishing.
+
+To sign with your own key, either copy
+[`signing/keystore.properties.example`](signing/keystore.properties.example) to
+`keystore.properties` in the project root (git-ignored), or set
+`TASKI_KEYSTORE`, `TASKI_KEYSTORE_PASSWORD`, `TASKI_KEY_ALIAS` and
+`TASKI_KEY_PASSWORD` (for CI). Android only updates an app in place with a build
+signed by the same key, so pick one key and keep it.
+
+The zip holds the APK and [install notes in English and Persian](docs/INSTALL.md).
 
 ## Tests
 

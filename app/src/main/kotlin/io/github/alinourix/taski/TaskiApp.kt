@@ -185,7 +185,8 @@ fun TaskiApp(
                     }
                 },
                 floatingActionButton = {
-                    AnimatedVisibility(visible = currentTab != null && currentTab != Tab.Settings, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
+                    // The board docks its own add button into its floating toolbar.
+                    AnimatedVisibility(visible = currentTab == Tab.Today || currentTab == Tab.Projects, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
                         CreateMenu(
                             expanded = fabOpen,
                             onExpandedChange = { fabOpen = it },
@@ -201,7 +202,12 @@ fun TaskiApp(
                             TodayScreen(onOpenTask = navController::navigateToTask, onOpenTimer = navController::navigateToTimer, contentPadding = padding)
                         }
                         composable<BoardRoute> {
-                            BoardScreen(onOpenTask = navController::navigateToTask, onManageTags = navController::navigateToTags, contentPadding = padding)
+                            BoardScreen(
+                                onOpenTask = navController::navigateToTask,
+                                onManageTags = navController::navigateToTags,
+                                onAddTask = { quickAdd = "" },
+                                contentPadding = padding,
+                            )
                         }
                         composable<ProjectsRoute> {
                             ProjectsScreen(onOpenProject = navController::navigateToProject, contentPadding = padding)

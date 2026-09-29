@@ -27,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.BookmarkAdd
@@ -50,7 +51,6 @@ import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -76,6 +76,12 @@ import androidx.compose.ui.draganddrop.mimeTypes
 import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.ToggleButton
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -110,6 +116,7 @@ private enum class FilterSheet { Status, Priority, Tags, Project }
 fun BoardScreen(
     onOpenTask: (String) -> Unit,
     onManageTags: () -> Unit,
+    onAddTask: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
     viewModel: BoardViewModel = hiltViewModel(),
 ) {
@@ -155,7 +162,8 @@ fun BoardScreen(
                 onSort = viewModel::setSort,
                 onToggleSubtasks = viewModel::toggleSubtasks,
                 onSave = { saving = true },
-                modifier = Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = contentPadding.calculateBottomPadding() + 16.dp),
+                onAddTask = onAddTask,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = contentPadding.calculateBottomPadding() + 16.dp),
             )
         }
     }
@@ -245,31 +253,62 @@ private fun ViewsRow(state: BoardState, onApply: (ViewDefinition) -> Unit, onDel
     }
 }
 
+/**
+ * The four filters as one Material 3 Expressive button group: pressing a button
+ * widens it and squeezes its neighbours, and a button stays in its checked shape
+ * and colour while its filter is on.
+ */
 @Composable
 private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onClear: () -> Unit) {
-    Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FilterButton(stringResource(R.string.board_filter_status), view.statuses.size) { onOpen(FilterSheet.Status) }
-        FilterButton(stringResource(R.string.board_filter_priority), view.priorities.size) { onOpen(FilterSheet.Priority) }
-        FilterButton(stringResource(R.string.board_filter_tags), view.tagIds.size) { onOpen(FilterSheet.Tags) }
-        FilterButton(stringResource(R.string.board_filter_project), view.projectIds.size) { onOpen(FilterSheet.Project) }
+    val persian = LocalUiConfig.current.persian
+    val filters = listOf(
+        Triple(FilterSheet.Status, stringResource(R.string.board_filter_status), view.statuses.size),
+        Triple(FilterSheet.Priority, stringResource(R.string.board_filter_priority), view.priorities.size),
+        Triple(FilterSheet.Tags, stringResource(R.string.board_filter_tags), view.tagIds.size),
+        Triple(FilterSheet.Project, stringResource(R.string.board_filter_project), view.projectIds.size),
+    )
+    val clearLabel = stringResource(R.string.board_clear_filters)
+    ButtonGroup(
+        overflowIndicator = { menu -> ButtonGroupDefaults.OverflowIndicator(menu) },
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    ) {
+        for ((sheet, label, count) in filters) {
+            val text = if (count > 0) "$label ${count.toString().localizeDigits(persian)}" else label
+            customItem(
+                buttonGroupContent = {
+                    val interaction = remember { MutableInteractionSource() }
+                    ToggleButton(
+                        checked = count > 0,
+                        onCheckedChange = { onOpen(sheet) },
+                        interactionSource = interaction,
+                        contentPadding = PaddingValues(horizontal = 10.dp),
+                        modifier = Modifier.weight(1f).animateWidth(interaction),
+                    ) {
+                        Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                },
+                menuContent = { menu ->
+                    DropdownMenuItem(text = { Text(text) }, onClick = { menu.dismiss(); onOpen(sheet) })
+                },
+            )
+        }
         if (view.hasFilters) {
-            TextButton(onClick = onClear) {
-                Icon(Icons.Rounded.FilterAltOff, null, Modifier.size(18.dp))
-                Text(stringResource(R.string.board_clear_filters), Modifier.padding(start = 6.dp))
-            }
+            customItem(
+                buttonGroupContent = {
+                    val interaction = remember { MutableInteractionSource() }
+                    FilledTonalIconButton(
+                        onClick = onClear,
+                        interactionSource = interaction,
+                        shapes = IconButtonDefaults.shapes(),
+                        modifier = Modifier.animateWidth(interaction),
+                    ) { Icon(Icons.Rounded.FilterAltOff, clearLabel) }
+                },
+                menuContent = { menu ->
+                    DropdownMenuItem(text = { Text(clearLabel) }, onClick = { menu.dismiss(); onClear() })
+                },
+            )
         }
     }
-}
-
-@Composable
-private fun FilterButton(label: String, count: Int, onClick: () -> Unit) {
-    val persian = LocalUiConfig.current.persian
-    FilterChip(
-        selected = count > 0,
-        onClick = onClick,
-        label = { Text(if (count > 0) "$label · ${count.toString().localizeDigits(persian)}" else label) },
-        trailingIcon = { Icon(Icons.Rounded.ExpandMore, null, Modifier.size(18.dp)) },
-    )
 }
 
 @Composable
@@ -425,6 +464,10 @@ private fun BoardColumn(
     }
 }
 
+/**
+ * The board's controls and its add button as one Material 3 Expressive floating
+ * toolbar, the FAB docked to it, centred over the content.
+ */
 @Composable
 private fun Toolbar(
     view: ViewDefinition,
@@ -433,20 +476,28 @@ private fun Toolbar(
     onSort: (SortKey) -> Unit,
     onToggleSubtasks: () -> Unit,
     onSave: () -> Unit,
+    onAddTask: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var groupMenu by remember { mutableStateOf(false) }
     var sortMenu by remember { mutableStateOf(false) }
     HorizontalFloatingToolbar(
         expanded = true,
+        floatingActionButton = {
+            FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = onAddTask) {
+                Icon(Icons.Rounded.Add, stringResource(R.string.board_add_task))
+            }
+        },
         modifier = modifier,
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
     ) {
-        IconToggleButton(checked = view.layout == ViewLayout.List, onCheckedChange = { onLayout(ViewLayout.List) }) {
-            Icon(Icons.AutoMirrored.Rounded.ViewList, stringResource(R.string.board_layout_list))
-        }
-        IconToggleButton(checked = view.layout == ViewLayout.Board, onCheckedChange = { onLayout(ViewLayout.Board) }) {
-            Icon(Icons.Rounded.ViewColumn, stringResource(R.string.board_layout_board))
+        // One button that shows the layout it switches to.
+        val toBoard = view.layout == ViewLayout.List
+        IconButton(onClick = { onLayout(if (toBoard) ViewLayout.Board else ViewLayout.List) }) {
+            Icon(
+                if (toBoard) Icons.Rounded.ViewColumn else Icons.AutoMirrored.Rounded.ViewList,
+                stringResource(if (toBoard) R.string.board_layout_board else R.string.board_layout_list),
+            )
         }
         Box {
             IconButton(onClick = { groupMenu = true }) { Icon(Icons.Rounded.TableRows, stringResource(R.string.board_group)) }

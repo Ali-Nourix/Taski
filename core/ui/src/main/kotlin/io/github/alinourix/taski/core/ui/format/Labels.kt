@@ -4,7 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Label
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Circle
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.DonutLarge
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Event
@@ -41,7 +41,7 @@ object TaskIcons {
     val Reminder = Icons.Rounded.NotificationsActive
 
     fun status(status: TaskStatus): ImageVector = when (status) {
-        TaskStatus.NotStarted -> Icons.Rounded.Circle
+        TaskStatus.NotStarted -> Icons.Rounded.RadioButtonUnchecked
         TaskStatus.InProgress -> Icons.Rounded.Timelapse
         TaskStatus.Done -> Icons.Rounded.CheckCircle
         TaskStatus.NotDone -> Icons.Rounded.Report

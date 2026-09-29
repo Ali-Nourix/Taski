@@ -25,6 +25,7 @@
     <string name="board_manage_tags">Manage tags</string>
     <string name="board_ascending">Ascending</string>
     <string name="board_descending">Descending</string>
+    <string name="board_add_task">Add task</string>
     <string name="board_drop_here">Drop here</string>
 
     <string name="group_none">No grouping</string>

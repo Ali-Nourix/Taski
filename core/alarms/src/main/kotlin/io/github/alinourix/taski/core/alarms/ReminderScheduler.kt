@@ -89,7 +89,9 @@ class ReminderScheduler @Inject constructor(
         // Keep the delivery key of tasks still around, so an alert is not repeated; drop the rest.
         val liveIds = items.map { it.id }.toSet()
         states.remove(stale.filter { it !in liveIds })
-        stale.filter { it in liveIds }.forEach { id -> existing[id]?.let { states.put(it.copy(scheduledAt = null)) } }
+        stale.filter { it in liveIds }.forEach { id ->
+            existing[id]?.takeIf { it.scheduledAt != null }?.let { states.put(it.copy(scheduledAt = null)) }
+        }
 
         val nextDigest = ReminderRules.nextDigestAt(Instant.ofEpochMilli(now), zone, prefs.digest, lastDigestAt?.let(Instant::ofEpochMilli))
         val digestIntent = ReminderReceiver.digestIntent(context)

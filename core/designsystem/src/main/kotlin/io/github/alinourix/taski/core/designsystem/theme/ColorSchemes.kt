@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.toArgb
 import com.google.android.material.color.utilities.Blend
 import com.google.android.material.color.utilities.DynamicScheme
 import com.google.android.material.color.utilities.Hct
-import com.google.android.material.color.utilities.SchemeExpressive
 import com.google.android.material.color.utilities.SchemeTonalSpot
 
 /** The brand seed used when the device offers no wallpaper colours. */
@@ -22,9 +21,10 @@ const val BRAND_SEED: Int = 0xFF4F5BD5.toInt()
  * Utilities, so every role (containers, surfaces, fixed colours) has the
  * tone the spec asks for rather than a hand-picked guess.
  */
-fun seededColorScheme(seed: Int, dark: Boolean, expressive: Boolean = true): ColorScheme {
+fun seededColorScheme(seed: Int, dark: Boolean): ColorScheme {
     val hct = Hct.fromInt(seed)
-    val scheme: DynamicScheme = if (expressive) SchemeExpressive(hct, dark, 0.0) else SchemeTonalSpot(hct, dark, 0.0)
+    // Tonal spot keeps the seed's hue for primary; the expressive variants rotate it away or push chroma until dark mode glares.
+    val scheme: DynamicScheme = SchemeTonalSpot(hct, dark, 0.0)
     val base = if (dark) darkColorScheme() else lightColorScheme()
     return base.copy(
         primary = Color(scheme.primary),

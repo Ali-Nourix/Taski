@@ -28,6 +28,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import org.robolectric.shadows.ShadowLooper
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -65,9 +67,13 @@ class AppScreenshotTest {
 
     private fun launch() = ActivityScenario.launch(MainActivity::class.java).also { settle() }
 
+    /** Lets Room's threads finish and moves Robolectric's paused clock past any debounce. */
     private fun settle() {
-        compose.waitForIdle()
-        Thread.sleep(400)
+        repeat(3) {
+            compose.waitForIdle()
+            Thread.sleep(150)
+            ShadowLooper.idleMainLooper(300, TimeUnit.MILLISECONDS)
+        }
         compose.waitForIdle()
     }
 

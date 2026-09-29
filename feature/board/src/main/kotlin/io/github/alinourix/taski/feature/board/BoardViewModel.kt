@@ -61,7 +61,8 @@ class BoardViewModel @Inject constructor(
     val actions = TaskActions(tasks, clock, viewModelScope)
     val search = MutableStateFlow("")
 
-    private val matches = search.debounce(150).flatMapLatest { tasks.search(it) }
+    // Typing is debounced; an empty query (the board opening, the field cleared) is not.
+    private val matches = search.debounce { if (it.isBlank()) 0L else 150L }.flatMapLatest { tasks.search(it) }
 
     private val catalog = combine(tags.observeTags(), projects.observeProjects(), views.observeViews(), timer.active) { t, p, v, a ->
         Catalog(t, p, v, a)
