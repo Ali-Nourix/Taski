@@ -2,5 +2,4 @@
 <full-backup-content>
     <include domain="database" path="taski.db" />
     <include domain="file" path="datastore/user_preferences.preferences_pb" />
-    <exclude domain="sharedpref" path="taski_device.xml" />
 </full-backup-content>
