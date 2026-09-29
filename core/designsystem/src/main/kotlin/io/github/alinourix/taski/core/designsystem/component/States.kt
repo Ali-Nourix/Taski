@@ -45,13 +45,13 @@ fun EmptyState(
     ) {
         ShapeIcon(
             icon = icon,
-            polygon = MaterialShapes.Cookie12Sided,
-            size = 96.dp,
-            iconSize = 44.dp,
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            polygon = MaterialShapes.Cookie9Sided,
+            size = 64.dp,
+            iconSize = 28.dp,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(title, style = MaterialTheme.typography.titleLargeEmphasized, textAlign = TextAlign.Center)
+        Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         body?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         }
@@ -75,11 +75,11 @@ fun SectionHeader(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 20.dp, bottom = 8.dp).semantics { heading() },
+        modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 24.dp, bottom = 4.dp).semantics { heading() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(title, style = MaterialTheme.typography.titleSmallEmphasized, color = MaterialTheme.colorScheme.primary)
+        Text(title, style = MaterialTheme.typography.labelLargeEmphasized, color = MaterialTheme.colorScheme.onSurfaceVariant)
         count?.let {
             Text(localizedCount(it), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

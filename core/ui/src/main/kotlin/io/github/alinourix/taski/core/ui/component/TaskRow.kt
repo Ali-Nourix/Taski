@@ -1,7 +1,7 @@
 package io.github.alinourix.taski.core.ui.component
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DoneAll
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -30,18 +32,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.alinourix.taski.core.designsystem.theme.AccentRoles
 import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.domain.model.TaskStatus
 import io.github.alinourix.taski.core.domain.timer.FocusTimerState
@@ -49,18 +47,27 @@ import io.github.alinourix.taski.core.ui.LocalClock
 import io.github.alinourix.taski.core.ui.LocalUiConfig
 import io.github.alinourix.taski.core.ui.R
 import io.github.alinourix.taski.core.ui.format.localizeDigits
-import io.github.alinourix.taski.core.ui.theme.roles
+import kotlinx.coroutines.delay
 
 /** Everything a task row can show beyond the task itself. */
 data class RowExtras(
     val showProject: Boolean = false,
-    /** The countdown on this device, shown as a live chip on the task it belongs to. */
+    /** The countdown on this device, shown as a live token on the task it belongs to. */
     val timer: FocusTimerState? = null,
 )
 
+enum class RowStyle {
+    /** A line on the page, divided from the next by a hairline. */
+    List,
+    /** A card on a board column: white, a 1dp border, crisp corners. */
+    Card,
+}
+
 /**
- * One task: the checkbox, the title, and a row of the plugin's chips. The
- * chips wrap rather than truncate, so nothing a task carries is hidden.
+ * One task: the checkbox, the title, and one quiet line of properties. Each
+ * property is edited where it is read — tapping the date opens the date
+ * picker, the priority opens priorities, a tag opens the tag picker — and a
+ * long-press opens the whole task sheet, like the plugin's chip menus.
  */
 @Composable
 fun TaskRow(
@@ -68,76 +75,100 @@ fun TaskRow(
     onToggle: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onStatusMenu: (() -> Unit)? = null,
+    onEdit: ((TaskProperty) -> Unit)? = null,
     extras: RowExtras = RowExtras(),
-    shape: Shape = MaterialTheme.shapes.large,
+    style: RowStyle = RowStyle.List,
+    showDivider: Boolean = true,
+    /** Off on board cards, where a long-press picks the card up instead. */
+    longPressMenu: Boolean = true,
 ) {
     val task = item.task
+    val menu = onEdit?.takeIf { longPressMenu }
     val config = LocalUiConfig.current
     val done = task.status == TaskStatus.Done
-    val titleAlpha by animateFloatAsState(if (done) 0.6f else 1f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "alpha")
-    val container by animateColorAsState(
-        if (task.status == TaskStatus.InProgress) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow,
-        MaterialTheme.motionScheme.defaultEffectsSpec(),
-        label = "container",
-    )
+    val titleAlpha by animateFloatAsState(if (done) 0.55f else 1f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "alpha")
 
-    Surface(modifier = modifier.fillMaxWidth(), shape = shape, color = container) {
+    val body = @Composable {
         Row(
             modifier = Modifier
-                .combinedClickable(onClick = onClick, onLongClick = onStatusMenu)
-                .padding(start = 4.dp, end = 16.dp, top = if (config.compact) 0.dp else 4.dp, bottom = if (config.compact) 0.dp else 4.dp),
+                .fillMaxWidth()
+                .combinedClickable(onClick = onClick, onLongClick = menu?.let { { it(TaskProperty.Menu) } })
+                .padding(start = 4.dp, end = 12.dp, top = if (config.compact) 0.dp else 2.dp, bottom = if (config.compact) 0.dp else 6.dp),
             verticalAlignment = if (config.compact) Alignment.CenterVertically else Alignment.Top,
         ) {
-            TaskCheckbox(status = task.status, onToggle = onToggle, priority = task.priority, onLongPress = onStatusMenu)
+            TaskCheckbox(
+                status = task.status,
+                onToggle = onToggle,
+                priority = task.priority,
+                onLongPress = menu?.let { { it(TaskProperty.Status) } },
+                size = 22.dp,
+            )
             Column(
-                modifier = Modifier.weight(1f).padding(top = if (config.compact) 0.dp else 12.dp, bottom = if (config.compact) 0.dp else 10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.weight(1f).padding(top = if (config.compact) 0.dp else 13.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
                     text = task.title,
                     style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = if (config.compact) 1 else 3,
                     overflow = TextOverflow.Ellipsis,
                     textDecoration = if (done) TextDecoration.LineThrough else null,
                     modifier = Modifier.alpha(titleAlpha),
                 )
-                if (!config.compact) {
-                    ChipRow(item, extras)
-                }
+                if (!config.compact) PropertyLine(item, extras, onEdit)
             }
             if (config.compact && task.dueDate != null) {
-                DueChip(task)
+                DueChip(task, Modifier.padding(start = 8.dp), onClick = onEdit?.let { { it(TaskProperty.Due) } })
             }
         }
+    }
+
+    when (style) {
+        RowStyle.List -> Column(modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+            body()
+            if (showDivider) HorizontalDivider(Modifier.padding(start = 52.dp), color = MaterialTheme.colorScheme.outlineVariant)
+        }
+        RowStyle.Card -> Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        ) { body() }
     }
 }
 
 @Composable
-private fun ChipRow(item: TaskItem, extras: RowExtras) {
+private fun PropertyLine(item: TaskItem, extras: RowExtras, onEdit: ((TaskProperty) -> Unit)?) {
     val task = item.task
     val persian = LocalUiConfig.current.persian
-    val hasChips = task.dueDate != null || task.priority != null || task.repeat != null || item.progressFraction != null ||
-        item.tags.isNotEmpty() || item.isBlocked || extras.timer?.taskId == task.id || (extras.showProject && item.project != null)
-    if (!hasChips) return
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        task.dueDate?.let { DueChip(task) }
-        task.priority?.let { PriorityChip(it) }
-        task.repeat?.let { RepeatChip(it) }
-        extras.timer?.takeIf { it.taskId == task.id }?.let { LiveTimerChip(it) }
+    fun edit(property: TaskProperty): (() -> Unit)? = onEdit?.let { { it(property) } }
+    val timer = extras.timer?.takeIf { it.taskId == task.id }
+    val hasAny = task.dueDate != null || task.priority != null || task.repeat != null || item.progressFraction != null ||
+        item.tags.isNotEmpty() || item.isBlocked || timer != null || (extras.showProject && item.project != null)
+    if (!hasAny) return
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp), itemVerticalAlignment = Alignment.CenterVertically) {
+        task.dueDate?.let { DueChip(task, onClick = edit(TaskProperty.Due)) }
+        task.priority?.let { PriorityChip(it, onClick = edit(TaskProperty.Priority)) }
+        task.repeat?.let { RepeatChip(it, onClick = edit(TaskProperty.Repeat)) }
+        timer?.let { LiveTimerChip(it) }
         if (item.subtaskCount > 0) {
-            val scheme = MaterialTheme.colorScheme
-            MetaChip(
+            PropertyToken(
                 stringResource(R.string.subtasks_count, item.subtasksDone, item.subtaskCount).localizeDigits(persian),
-                AccentRoles(scheme.onSurfaceVariant, scheme.surface, scheme.surfaceContainerHighest, scheme.onSurfaceVariant),
                 icon = Icons.AutoMirrored.Rounded.List,
             )
         } else {
             item.progressFraction?.let { ProgressChip(it) }
         }
         if (item.isBlocked) BlockedChip()
-        if (extras.showProject) item.project?.let { MetaChip(it.name, it.color.roles()) }
-        item.tags.forEach { TagChip(it) }
+        if (extras.showProject) item.project?.let {
+            PropertyToken(it.name, icon = Icons.Rounded.Folder, onClick = edit(TaskProperty.Project))
+        }
+        if (item.tags.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                item.tags.forEach { TagChip(it, onClick = edit(TaskProperty.Tags)) }
+            }
+        }
     }
 }
 
@@ -153,9 +184,9 @@ fun SwipeableTaskRow(
     onDelete: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onStatusMenu: (() -> Unit)? = null,
+    onEdit: ((TaskProperty) -> Unit)? = null,
     extras: RowExtras = RowExtras(),
-    shape: Shape = MaterialTheme.shapes.large,
+    showDivider: Boolean = true,
 ) {
     val state = rememberSwipeToDismissBoxState()
     LaunchedEffect(state.currentValue) {
@@ -168,14 +199,14 @@ fun SwipeableTaskRow(
     }
     SwipeToDismissBox(
         state = state,
-        modifier = modifier.clip(shape),
+        modifier = modifier,
         backgroundContent = {
             val direction = state.dismissDirection
             val scheme = MaterialTheme.colorScheme
             val (color, icon, align) = when (direction) {
                 SwipeToDismissBoxValue.StartToEnd -> Triple(scheme.primaryContainer, Icons.Rounded.DoneAll, Alignment.CenterStart)
                 SwipeToDismissBoxValue.EndToStart -> Triple(scheme.errorContainer, Icons.Rounded.Delete, Alignment.CenterEnd)
-                SwipeToDismissBoxValue.Settled -> Triple(scheme.surfaceContainerLow, null, Alignment.Center)
+                SwipeToDismissBoxValue.Settled -> Triple(scheme.surface, null, Alignment.Center)
             }
             val label = when (direction) {
                 SwipeToDismissBoxValue.StartToEnd -> stringResource(R.string.swipe_complete)
@@ -185,16 +216,16 @@ fun SwipeableTaskRow(
             Box(Modifier.fillMaxSize().background(color).padding(horizontal = 24.dp), contentAlignment = align) {
                 if (icon != null) {
                     val scale = (state.progress * 1.4f).coerceIn(0.6f, 1.2f)
-                    Icon(icon, contentDescription = label, modifier = Modifier.size(24.dp).graphicsLayer { scaleX = scale; scaleY = scale })
+                    Icon(icon, contentDescription = label, modifier = Modifier.size(22.dp).graphicsLayer { scaleX = scale; scaleY = scale })
                 }
             }
         },
     ) {
-        TaskRow(item, onToggle, onClick, onStatusMenu = onStatusMenu, extras = extras, shape = shape)
+        TaskRow(item, onToggle, onClick, onEdit = onEdit, extras = extras, showDivider = showDivider)
     }
 }
 
-/** A timer chip that ticks on its own, so the list around it never recomposes per second. */
+/** A timer token that ticks on its own, so the list around it never recomposes per second. */
 @Composable
 fun LiveTimerChip(state: FocusTimerState, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val persian = LocalUiConfig.current.persian

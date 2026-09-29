@@ -51,4 +51,14 @@
     <string name="bucket_past">گذشته</string>
     <string name="bucket_none">بدون سررسید</string>
     <string name="group_all">همه</string>
+    <string name="board_layout_table">جدول</string>
+    <string name="board_new">جدید</string>
+    <string name="board_search_open">جستجو</string>
+    <string name="col_task">تسک</string>
+    <string name="col_status">وضعیت</string>
+    <string name="col_due">سررسید</string>
+    <string name="col_priority">اولویت</string>
+    <string name="col_tags">برچسب‌ها</string>
+    <string name="col_progress">پیشرفت</string>
+    <string name="col_project">پروژه</string>
 </resources>

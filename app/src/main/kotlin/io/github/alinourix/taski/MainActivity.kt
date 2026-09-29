@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.Dark -> true
             }
             val persian = resources.configuration.locales[0].language == "fa"
-            TaskiTheme(darkTheme = dark, dynamicColor = current.dynamicColor, persian = persian) {
+            TaskiTheme(darkTheme = dark, materialYou = current.materialYou, persian = persian) {
                 TaskiApp(
                     prefs = current,
                     persian = persian,

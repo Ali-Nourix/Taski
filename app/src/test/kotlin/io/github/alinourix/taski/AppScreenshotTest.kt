@@ -4,7 +4,9 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -82,6 +84,12 @@ class AppScreenshotTest {
         settle()
     }
 
+    /** Taps a task's title itself: the middle of a row can be one of its property buttons. */
+    private fun openTask(title: String) {
+        compose.onAllNodes(hasText(title), useUnmergedTree = true)[0].performClick()
+        settle()
+    }
+
     private fun openCreateMenu() {
         compose.onAllNodes(hasClickAction() and androidx.compose.ui.test.hasContentDescription("Create"))[0].performClick()
         settle()
@@ -101,7 +109,7 @@ class AppScreenshotTest {
             tap("Settings")
             shoot("settings")
             tap("Today")
-            tap("Draft the launch brief")
+            openTask("Draft the launch brief")
             shoot("editor")
         }
     }
@@ -120,6 +128,24 @@ class AppScreenshotTest {
             openCreateMenu()
             tap("Focus timer")
             shoot("timer-dark")
+        }
+    }
+
+    @Test
+    fun databaseViewsAndPages() {
+        seed()
+        runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.Table), lastTab = "board") } }
+        launch().use {
+            shoot("board-table")
+            runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.Board)) } }
+            settle()
+            shoot("board-kanban")
+            tap("Projects")
+            tap("Product launch")
+            shoot("project")
+            compose.onAllNodes(hasText("Plan the team offsite") and hasClickAction())[0].performTouchInput { longClick() }
+            settle()
+            captureScreenRoboImage("${SHOTS}/task-sheet.png")
         }
     }
 
@@ -143,7 +169,7 @@ class AppScreenshotTest {
             tap("بورد")
             shoot("board-fa")
             tap("امروز")
-            tap("نوشتن پیش‌نویس معرفی محصول")
+            openTask("نوشتن پیش‌نویس معرفی محصول")
             shoot("editor-fa")
         }
     }

@@ -8,7 +8,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
-enum class ViewLayout { @SerialName("list") List, @SerialName("board") Board }
+enum class ViewLayout { @SerialName("list") List, @SerialName("table") Table, @SerialName("board") Board }
 
 @Serializable
 enum class GroupBy {

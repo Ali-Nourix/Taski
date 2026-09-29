@@ -76,4 +76,31 @@ class TaskQueryTest {
         assertEquals(view, ViewDefinition.decode(view.encode()))
         assertEquals(null, ViewDefinition.decode("""{"v":9}"""))
     }
+
+    @Test
+    fun aTaskAddedInAGroupTakesTheGroupsValue() {
+        val view = ViewDefinition(groupBy = GroupBy.Status)
+        val inProgress = TaskGroup("status:in_progress", GroupBy.Status, "in_progress", emptyList())
+        assertEquals(TaskStatus.InProgress, TaskQuery.newTaskFor("x", view, inProgress, today).status)
+
+        val tagGroup = TaskGroup("tag:work", GroupBy.Tag, "work", emptyList())
+        assertEquals(listOf("work"), TaskQuery.newTaskFor("x", view, tagGroup, today).tagIds)
+
+        val todayGroup = TaskGroup("deadline:today", GroupBy.Deadline, "today", emptyList())
+        assertEquals(today, TaskQuery.newTaskFor("x", view, todayGroup, today).dueDate)
+
+        val inbox = TaskGroup("project:", GroupBy.Project, ViewDefinition.NONE, emptyList())
+        assertEquals(null, TaskQuery.newTaskFor("x", view.copy(projectIds = listOf("p1")), inbox, today).projectId)
+    }
+
+    @Test
+    fun activeFiltersPinDownANewTaskOutsideAnyGroup() {
+        val view = ViewDefinition(statuses = listOf("in_progress"), priorities = listOf("high"), projectIds = listOf("p1"), tagIds = listOf("work", "home"))
+        val task = TaskQuery.newTaskFor("x", view, null, today)
+        assertEquals(TaskStatus.InProgress, task.status)
+        assertEquals(Priority.High, task.priority)
+        assertEquals("p1", task.projectId)
+        assertEquals(listOf("work"), task.tagIds)
+        assertEquals(null, TaskQuery.newTaskFor("x", ViewDefinition(priorities = listOf("high", "low")), null, today).priority)
+    }
 }

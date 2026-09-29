@@ -12,7 +12,7 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_dynamic_color">Colours from wallpaper</string>
-    <string name="settings_dynamic_color_body">Material You on Android 12 and newer</string>
+    <string name="settings_dynamic_color_body">Off: Paper, a calm document-like look</string>
     <string name="settings_density">List density</string>
     <string name="settings_density_comfortable">Comfortable</string>
     <string name="settings_density_compact">Compact</string>

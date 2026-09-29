@@ -46,7 +46,8 @@ data class UserPreferences(
     val language: AppLanguage = AppLanguage.System,
     val calendar: CalendarSystem = CalendarSystem.Gregorian,
     val themeMode: ThemeMode = ThemeMode.System,
-    val dynamicColor: Boolean = true,
+    /** Wallpaper colours (Android 12+) instead of the Paper look. */
+    val materialYou: Boolean = false,
     val density: Density = Density.Comfortable,
     val lastTab: String = "today",
     val board: ViewDefinition = ViewDefinition(),

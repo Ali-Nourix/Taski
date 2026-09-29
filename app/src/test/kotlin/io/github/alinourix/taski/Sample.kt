@@ -26,7 +26,7 @@ object Sample {
         persian: Boolean,
         today: LocalDate,
     ): Map<String, String> {
-        prefs.update { it.copy(dynamicColor = false, calendar = if (persian) CalendarSystem.Jalali else CalendarSystem.Gregorian, markOverdueNotDone = false) }
+        prefs.update { it.copy(materialYou = false, calendar = if (persian) CalendarSystem.Jalali else CalendarSystem.Gregorian, markOverdueNotDone = false) }
         fun t(en: String, fa: String) = if (persian) fa else en
 
         val work = tags.create(t("Work", "کار"), ColorToken.Palette.Blue)

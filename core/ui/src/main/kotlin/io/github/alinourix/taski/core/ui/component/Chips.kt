@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -14,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,6 +24,7 @@ import io.github.alinourix.taski.core.domain.model.Priority
 import io.github.alinourix.taski.core.domain.model.RepeatRule
 import io.github.alinourix.taski.core.domain.model.Tag
 import io.github.alinourix.taski.core.domain.model.Task
+import io.github.alinourix.taski.core.domain.model.TaskStatus
 import io.github.alinourix.taski.core.ui.LocalUiConfig
 import io.github.alinourix.taski.core.ui.R
 import io.github.alinourix.taski.core.ui.format.TaskIcons
@@ -31,12 +33,38 @@ import io.github.alinourix.taski.core.ui.format.dueText
 import io.github.alinourix.taski.core.ui.format.localizeDigits
 import io.github.alinourix.taski.core.ui.format.priorityLabel
 import io.github.alinourix.taski.core.ui.format.repeatLabel
+import io.github.alinourix.taski.core.ui.format.statusLabel
 import io.github.alinourix.taski.core.ui.theme.roles
 
 /**
- * The plugin's chips, as Material pills: every chip is a tint of one accent,
- * so a new kind of chip is one colour choice and inherits the theme.
+ * A property shown the quiet way: a small icon and grey text, no container.
+ * Colour appears only when it means something (an overdue date, a priority's
+ * icon). Tappable when [onClick] is given, so the property is edited where it
+ * is read.
  */
+@Composable
+fun PropertyToken(
+    label: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: (() -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 2.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        icon?.let { Icon(it, contentDescription = null, tint = iconTint, modifier = Modifier.size(14.dp)) }
+        Text(label, style = MaterialTheme.typography.labelMedium, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** A filled pill for values that are themselves coloured: tags, statuses. Crisp corners, pastel fill. */
 @Composable
 fun MetaChip(
     label: String,
@@ -46,83 +74,75 @@ fun MetaChip(
     onClick: (() -> Unit)? = null,
 ) {
     Surface(
-        modifier = modifier.heightIn(min = 24.dp),
-        shape = RoundedCornerShape(8.dp),
+        modifier = modifier.heightIn(min = 22.dp),
+        shape = MaterialTheme.shapes.extraSmall,
         color = roles.container,
         contentColor = roles.onContainer,
     ) {
         Row(
             modifier = (if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(horizontal = 8.dp, vertical = 3.dp),
+                .padding(horizontal = 6.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            icon?.let { Icon(it, contentDescription = null, modifier = Modifier.size(14.dp)) }
+            icon?.let { Icon(it, contentDescription = null, modifier = Modifier.size(13.dp)) }
             Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
 
 @Composable
-private fun neutralRoles(): AccentRoles = MaterialTheme.colorScheme.let {
-    AccentRoles(it.onSurfaceVariant, it.surface, it.surfaceContainerHighest, it.onSurfaceVariant)
+fun dueColor(urgency: Urgency): Color = when (urgency) {
+    Urgency.Overdue -> MaterialTheme.colorScheme.error
+    Urgency.Today -> MaterialTheme.colorScheme.tertiary
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
 @Composable
 fun DueChip(task: Task, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val due = dueText(task) ?: return
-    val scheme = MaterialTheme.colorScheme
-    val roles = when (due.urgency) {
-        Urgency.Overdue -> AccentRoles(scheme.error, scheme.onError, scheme.errorContainer, scheme.onErrorContainer)
-        Urgency.Today -> AccentRoles(scheme.tertiary, scheme.onTertiary, scheme.tertiaryContainer, scheme.onTertiaryContainer)
-        Urgency.Soon -> AccentRoles(scheme.secondary, scheme.onSecondary, scheme.secondaryContainer, scheme.onSecondaryContainer)
-        Urgency.Later, Urgency.Met -> neutralRoles()
-    }
-    MetaChip(due.label, roles, modifier, TaskIcons.Due, onClick)
+    val color = dueColor(due.urgency)
+    PropertyToken(due.label, modifier, TaskIcons.Due, iconTint = color, textColor = color, onClick = onClick)
 }
 
 @Composable
 fun PriorityChip(priority: Priority, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) =
-    MetaChip(priorityLabel(priority), priority.roles(), modifier, TaskIcons.priority(priority), onClick)
+    PropertyToken(priorityLabel(priority), modifier, TaskIcons.priority(priority), iconTint = priority.roles().accent, onClick = onClick)
 
 @Composable
 fun RepeatChip(rule: RepeatRule, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) =
-    MetaChip(repeatLabel(rule), neutralRoles(), modifier, TaskIcons.Repeat, onClick)
+    PropertyToken(repeatLabel(rule), modifier, TaskIcons.Repeat, onClick = onClick)
 
 @Composable
 fun TagChip(tag: Tag, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) =
     MetaChip(tag.name, tag.color.roles(), modifier, null, onClick)
 
 @Composable
-fun ProgressChip(fraction: Float, modifier: Modifier = Modifier) {
+fun StatusChip(status: TaskStatus, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    val roles = status.roles()
+    MetaChip(statusLabel(status), roles, modifier, TaskIcons.status(status), onClick)
+}
+
+@Composable
+fun ProgressChip(fraction: Float, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val persian = LocalUiConfig.current.persian
-    val scheme = MaterialTheme.colorScheme
-    MetaChip(
+    PropertyToken(
         stringResource(R.string.percent, (fraction * 100).toInt()).localizeDigits(persian),
-        AccentRoles(scheme.primary, scheme.onPrimary, scheme.primaryContainer, scheme.onPrimaryContainer),
         modifier,
         TaskIcons.Progress,
+        iconTint = MaterialTheme.colorScheme.primary,
+        onClick = onClick,
     )
 }
 
 @Composable
 fun TimerChip(label: String, running: Boolean, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
-    val scheme = MaterialTheme.colorScheme
-    val roles = if (running) {
-        AccentRoles(scheme.tertiary, scheme.onTertiary, scheme.tertiaryContainer, scheme.onTertiaryContainer)
-    } else {
-        neutralRoles()
-    }
-    MetaChip(label, roles, modifier, TaskIcons.Timer, onClick)
+    val color = if (running) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    PropertyToken(label, modifier, TaskIcons.Timer, iconTint = color, textColor = color, onClick = onClick)
 }
 
 @Composable
 fun BlockedChip(modifier: Modifier = Modifier) {
-    val scheme = MaterialTheme.colorScheme
-    MetaChip(
-        stringResource(R.string.blocked),
-        AccentRoles(scheme.error, scheme.onError, scheme.errorContainer, scheme.onErrorContainer),
-        modifier,
-        TaskIcons.Blocked,
-    )
+    val color = MaterialTheme.colorScheme.error
+    PropertyToken(stringResource(R.string.blocked), modifier, TaskIcons.Blocked, iconTint = color, textColor = color)
 }

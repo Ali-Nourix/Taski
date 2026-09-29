@@ -82,7 +82,7 @@ class ReminderAlertActivity : ComponentActivity() {
                 ThemeMode.System -> androidx.compose.foundation.isSystemInDarkTheme()
             }
             val persian = LocalConfiguration.current.locales[0].language == "fa"
-            TaskiTheme(darkTheme = dark, dynamicColor = current.dynamicColor, persian = persian) {
+            TaskiTheme(darkTheme = dark, materialYou = current.materialYou, persian = persian) {
                 CompositionLocalProvider(LocalUiConfig provides UiConfig(current.calendar, persian, current.density, clock.today(), clock.zone())) {
                     val strict = current.digest.strictness == Strictness.Strict
                     var hold by remember { mutableIntStateOf(if (strict) current.digest.strictHoldSeconds else 0) }

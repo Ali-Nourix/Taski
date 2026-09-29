@@ -10,13 +10,18 @@ It works fully offline and without an account. Its storage is already shaped for
 a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 
 <p>
-<img src="docs/screenshots/today.png" width="260" alt="Today">
-<img src="docs/screenshots/board-list.png" width="260" alt="Board, as a list grouped by status">
-<img src="docs/screenshots/editor.png" width="260" alt="Task editor">
+<img src="docs/screenshots/board-table.png" width="260" alt="Board as a table: frozen task column, sortable headers">
+<img src="docs/screenshots/board-list.png" width="260" alt="Board as a list grouped by status">
+<img src="docs/screenshots/board-kanban.png" width="260" alt="Board as kanban">
 </p>
 <p>
+<img src="docs/screenshots/editor.png" width="260" alt="A task as a page, with its properties">
+<img src="docs/screenshots/task-sheet.png" width="260" alt="Long-press a task for its sheet">
+<img src="docs/screenshots/project.png" width="260" alt="A project as a page">
+</p>
+<p>
+<img src="docs/screenshots/today.png" width="260" alt="Today">
 <img src="docs/screenshots/board-kanban-dark.png" width="260" alt="Board as kanban, dark">
-<img src="docs/screenshots/timer-dark.png" width="260" alt="Focus timer">
 <img src="docs/screenshots/today-fa.png" width="260" alt="Today in Persian with Jalali dates">
 </p>
 
@@ -27,14 +32,15 @@ a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 
 | TaskPro plugin | Taski |
 | --- | --- |
-| `[ ]` `[/]` `[x]` `[!]` and the `Ctrl+T` four-state toggle | A checkbox that morphs through the four states; tap toggles done, long-press picks any status; connected button group in the editor |
+| `[ ]` `[/]` `[x]` `[!]` and the `Ctrl+T` four-state toggle | A checkbox that morphs through the four states; tap toggles done, long-press picks any status |
+| Chips you click to change a property in place | Every property on a row is its own button: tap the date for the date picker, the priority for priorities, a tag for the tag picker; long-press a task for its whole sheet (status, every property, capabilities, focus, copy as Obsidian line, delete) |
 | `@priority(highest…lowest)` with chevron icons | Same five levels, same icons, harmonised colours |
 | `@due(2026-12-31)`, deadline chips (*Tomorrow*, *3 days left*, *Overdue*) | Due date and optional time, the same relative chips, picked in a **Gregorian or Jalali** month grid |
 | `@repeat(2w)`, rolling forward on completion, weekday kept, stale deadlines catch up, month-end clamps | Identical rules (the plugin's own test cases are ported), plus a record of every completion |
 | `@tag(work, deep-work)`, Notion-like picker with create-on-the-spot | Same picker; tags are linked by id, so renaming or recolouring never touches a task |
 | Progress bar capability | Steps done / total, with a wavy progress bar |
 | Focus timer capability, notification when time is up, survives restarts | Timer computed from timestamps, countdown notification with pause / +5 / stop, alarm at zero — no foreground service |
-| Task board: table or kanban; group by status, tag, priority, deadline, note; sort; filter; search; drag a card to change it | List or kanban; group by status, tag, priority, deadline, **project**; sort; filter; full-text search; drag cards between columns; **saved views** |
+| Task board: table or kanban; group by status, tag, priority, deadline, note; sort; filter; search; drag a card to change it | **Table**, list or kanban over the same rows. The table freezes the task column and scrolls the rest together; tap a header to sort, a cell to edit it. Group by status, tag, priority, deadline or **project**; filter; full-text search; drag cards between columns; **"+ New" in every group** adds a task that already has the group's value; **saved views** |
 | Notes as task containers, the Inbox | Projects (with manual order) and the Inbox |
 | Reminders: daily times, repeat interval, quiet hours, filters by priority / status / deadline / age, gentle · normal · strict | The same schedule and filters as a daily digest; strict mode is a full-screen alert over the lock screen that must be held before it can be acknowledged; plus a per-task reminder before its due moment |
 | Overdue tasks move into `[!]` | Same, as a setting |
@@ -45,6 +51,16 @@ And some things only a phone app has: subtasks and **dependencies** (a task can
 wait for another and shows as blocked), swipe to complete or delete with undo,
 trash with restore, share text from any app into a new task, the focus timer and
 digest in notifications, dynamic colour, adaptive layout for tablets.
+
+## Design
+
+The app is laid out the way a document workspace would lay it out: a task is a
+line on a page, a project is a page, a task opened is a page with a property
+table under its title. The default **Paper** theme is warm monochrome — near-black
+ink `#37352F` on white, grey `#787774` for everything secondary, 1dp hairlines
+`#E9E9E7` instead of cards and shadows, small corner radii — and colour is kept for
+meaning: status, priority, tag and project colours are Notion's muted pastels,
+an overdue date is red. Wallpaper colours (Material You) are a setting.
 
 ## Material 3 Expressive
 
@@ -58,23 +74,22 @@ circle into a cookie when a task is done, the play button morphs as the timer
 runs, a selected date or colour becomes a cookie. Segmented lists with large
 outer and small inner corners; buttons that change shape when pressed.
 
-Colours come from the wallpaper on Android 12+, or from one brand seed through
-Material Color Utilities. Tag and project colours are the plugin's palette,
-harmonised toward the theme and toned for light or dark, the way the plugin tints
-chips from the Obsidian theme.
+With Material You switched on, colours come from the wallpaper on Android 12+;
+tag and project colours are then harmonised toward it and toned for light or
+dark, the way the plugin tints chips from the Obsidian theme.
 
 ## Architecture
 
 ```
 app                 Activity, navigation, adaptive shell, FAB menu, locale
 feature/today       Today: overdue, due, in progress, coming up, done
-feature/board       All tasks: list / kanban, filters, grouping, saved views
+feature/board       All tasks: table / list / kanban, filters, grouping, saved views
 feature/projects    Projects and a project's tasks in manual order
-feature/editor      Task editor, quick add
+feature/editor      Task page, quick add
 feature/timer       Focus timer
 feature/tags        Tag manager
 feature/settings    Settings, reminder schedule, trash, Obsidian import/export
-core/ui             Chips, checkbox, task rows, pickers, date formatting (both calendars)
+core/ui             Task rows, property tokens, task sheet, pickers, date formatting (both calendars)
 core/designsystem   Theme, colour roles, typography, shapes, generic components
 core/alarms         Alarms, notifications, receivers, strict alert, timer controller
 core/data           Room, DataStore, repositories, outbox, SyncEngine seam

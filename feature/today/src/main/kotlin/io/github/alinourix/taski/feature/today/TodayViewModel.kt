@@ -3,8 +3,13 @@ package io.github.alinourix.taski.feature.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.alinourix.taski.core.domain.model.Project
+import io.github.alinourix.taski.core.domain.model.Tag
 import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.domain.model.TaskStatus
+import io.github.alinourix.taski.core.domain.repository.PreferencesRepository
+import io.github.alinourix.taski.core.domain.repository.ProjectRepository
+import io.github.alinourix.taski.core.domain.repository.TagRepository
 import io.github.alinourix.taski.core.domain.repository.TaskRepository
 import io.github.alinourix.taski.core.domain.time.Clock
 import io.github.alinourix.taski.core.domain.timer.FocusTimerController
@@ -13,6 +18,7 @@ import io.github.alinourix.taski.core.ui.component.TaskActions
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import javax.inject.Inject
@@ -26,7 +32,11 @@ data class TodayState(
     val doneToday: List<TaskItem> = emptyList(),
     val timer: FocusTimerState? = null,
     val timerTask: TaskItem? = null,
+    val tags: List<Tag> = emptyList(),
+    val projects: List<Project> = emptyList(),
 ) {
+    fun find(id: String): TaskItem? = (overdue + dueToday + inProgress + upcoming + doneToday).firstOrNull { it.id == id }
+
     val openCount: Int get() = overdue.size + dueToday.size + inProgress.size
     val isEmpty: Boolean get() = openCount == 0 && upcoming.isEmpty() && doneToday.isEmpty()
     val progress: Float get() = (openCount + doneToday.size).let { if (it == 0) 0f else doneToday.size.toFloat() / it }
@@ -35,12 +45,23 @@ data class TodayState(
 @HiltViewModel
 class TodayViewModel @Inject constructor(
     tasks: TaskRepository,
+    tags: TagRepository,
+    projects: ProjectRepository,
+    preferences: PreferencesRepository,
     private val clock: Clock,
     timer: FocusTimerController,
 ) : ViewModel() {
-    val actions = TaskActions(tasks, clock, viewModelScope)
+    private val defaultMinutes = preferences.preferences.map { it.defaultTimerMinutes }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, FocusTimerState.DEFAULT_MINUTES)
 
-    val state: StateFlow<TodayState> = combine(tasks.observeItems(), timer.active) { items, active ->
+    val actions = TaskActions(tasks, tags, clock, viewModelScope, timer) { defaultMinutes.value }
+
+    val state: StateFlow<TodayState> = combine(
+        tasks.observeItems(),
+        timer.active,
+        tags.observeTags(),
+        projects.observeProjects(),
+    ) { items, active, tagList, projectList ->
         val today = clock.today()
         val order = compareBy<TaskItem>({ -(it.task.priority?.rank ?: 0) }, { it.task.dueTime }, { it.task.sortKey })
         val open = items.filter { it.task.status != TaskStatus.Done }
@@ -62,6 +83,8 @@ class TodayViewModel @Inject constructor(
             },
             timer = active,
             timerTask = active?.let { a -> items.firstOrNull { it.id == a.taskId } },
+            tags = tagList,
+            projects = projectList,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayState())
 }

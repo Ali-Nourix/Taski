@@ -10,6 +10,7 @@ import io.github.alinourix.taski.core.domain.model.SavedView
 import io.github.alinourix.taski.core.domain.model.SortKey
 import io.github.alinourix.taski.core.domain.model.Tag
 import io.github.alinourix.taski.core.domain.model.TaskEdit
+import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.domain.model.TaskStatus
 import io.github.alinourix.taski.core.domain.model.ViewDefinition
 import io.github.alinourix.taski.core.domain.model.ViewLayout
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,19 +48,24 @@ data class BoardState(
     val savedViews: List<SavedView> = emptyList(),
     val collapsed: Set<String> = emptySet(),
     val timer: FocusTimerState? = null,
-)
+) {
+    fun find(id: String): TaskItem? = groups.firstNotNullOfOrNull { group -> group.items.firstOrNull { it.id == id } }
+}
 
 @HiltViewModel
 class BoardViewModel @Inject constructor(
     private val tasks: TaskRepository,
-    tags: TagRepository,
+    private val tags: TagRepository,
     projects: ProjectRepository,
     private val views: SavedViewRepository,
     private val preferences: PreferencesRepository,
     private val clock: Clock,
     timer: FocusTimerController,
 ) : ViewModel() {
-    val actions = TaskActions(tasks, clock, viewModelScope)
+    private val defaultMinutes = preferences.preferences.map { it.defaultTimerMinutes }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, FocusTimerState.DEFAULT_MINUTES)
+
+    val actions = TaskActions(tasks, tags, clock, viewModelScope, timer) { defaultMinutes.value }
     val search = MutableStateFlow("")
 
     // Typing is debounced; an empty query (the board opening, the field cleared) is not.
@@ -152,6 +159,12 @@ class BoardViewModel @Inject constructor(
                 GroupBy.None -> Unit
             }
         }
+    }
+
+    /** Adds a task inside [group] (or the view as a whole), inheriting what it pins down. */
+    fun addTask(title: String, group: TaskGroup?) {
+        if (title.isBlank()) return
+        actions.create(TaskQuery.newTaskFor(title.trim(), state.value.view, group, clock.today()))
     }
 
     private fun List<String>.toggle(value: String) = if (value in this) this - value else this + value

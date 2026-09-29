@@ -14,6 +14,6 @@ data class ProjectRoute(val id: String? = null)
 
 fun NavController.navigateToProject(id: String?) = navigate(ProjectRoute(id)) { launchSingleTop = true }
 
-fun NavGraphBuilder.projectScreen(onBack: () -> Unit, onOpenTask: (String) -> Unit) {
-    composable<ProjectRoute> { ProjectScreen(onBack = onBack, onOpenTask = onOpenTask) }
+fun NavGraphBuilder.projectScreen(onBack: () -> Unit, onOpenTask: (String) -> Unit, onOpenTimer: () -> Unit) {
+    composable<ProjectRoute> { ProjectScreen(onBack = onBack, onOpenTask = onOpenTask, onOpenTimer = onOpenTimer) }
 }

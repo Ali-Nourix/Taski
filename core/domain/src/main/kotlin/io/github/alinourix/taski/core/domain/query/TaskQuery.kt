@@ -1,6 +1,7 @@
 package io.github.alinourix.taski.core.domain.query
 
 import io.github.alinourix.taski.core.domain.model.GroupBy
+import io.github.alinourix.taski.core.domain.model.NewTask
 import io.github.alinourix.taski.core.domain.model.Priority
 import io.github.alinourix.taski.core.domain.model.SortKey
 import io.github.alinourix.taski.core.domain.model.Tag
@@ -158,6 +159,38 @@ object TaskQuery {
                     .map { (id, _, list) -> make(id, list) }
             }
         }
+    }
+
+    /**
+     * A new task added inside [group] takes that group's value, and otherwise
+     * whatever the active filters pin down, so it does not vanish from the view
+     * the moment it is created — the plugin board's rule.
+     */
+    fun newTaskFor(title: String, view: ViewDefinition, group: TaskGroup?, today: LocalDate): NewTask {
+        fun single(values: List<String>) = values.singleOrNull()?.takeIf { it != ViewDefinition.NONE }
+        var task = NewTask(
+            title = title,
+            status = single(view.statuses)?.let(TaskStatus::fromCode) ?: TaskStatus.NotStarted,
+            priority = single(view.priorities)?.let(Priority::fromCode),
+            projectId = single(view.projectIds),
+            tagIds = view.tagIds.filter { it != ViewDefinition.NONE }.take(1),
+        )
+        if (group == null) return task
+        val value = group.value
+        task = when (group.groupBy) {
+            GroupBy.Status -> task.copy(status = TaskStatus.fromCode(value))
+            GroupBy.Priority -> task.copy(priority = Priority.fromCode(value))
+            GroupBy.Tag -> task.copy(tagIds = if (value.isEmpty()) emptyList() else listOf(value))
+            GroupBy.Project -> task.copy(projectId = value.ifEmpty { null })
+            GroupBy.Deadline -> when (value) {
+                DeadlineBucket.Today.name.lowercase() -> task.copy(dueDate = today)
+                DeadlineBucket.Week.name.lowercase() -> task.copy(dueDate = today.plusDays(1))
+                DeadlineBucket.Later.name.lowercase() -> task.copy(dueDate = today.plusDays(8))
+                else -> task
+            }
+            GroupBy.None -> task
+        }
+        return task
     }
 
     fun summarize(items: List<TaskItem>, today: LocalDate): Summary {

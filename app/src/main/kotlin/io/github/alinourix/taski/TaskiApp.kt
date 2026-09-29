@@ -206,6 +206,7 @@ fun TaskiApp(
                                 onOpenTask = navController::navigateToTask,
                                 onManageTags = navController::navigateToTags,
                                 onAddTask = { quickAdd = "" },
+                                onOpenTimer = navController::navigateToTimer,
                                 contentPadding = padding,
                             )
                         }
@@ -221,7 +222,7 @@ fun TaskiApp(
                             )
                         }
                         taskEditorScreen(onBack = navController::popBackStack, onOpenTask = navController::navigateToTask, onOpenTimer = navController::navigateToTimer)
-                        projectScreen(onBack = navController::popBackStack, onOpenTask = navController::navigateToTask)
+                        projectScreen(onBack = navController::popBackStack, onOpenTask = navController::navigateToTask, onOpenTimer = navController::navigateToTimer)
                         tagsScreen(onBack = navController::popBackStack)
                         timerScreen(onBack = navController::popBackStack, onOpenTask = navController::navigateToTask)
                         settingsDetailScreens(onBack = navController::popBackStack, onSendTestDigest = {

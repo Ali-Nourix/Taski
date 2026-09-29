@@ -8,9 +8,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.alinourix.taski.core.domain.model.ColorToken
 import io.github.alinourix.taski.core.domain.model.NewTask
 import io.github.alinourix.taski.core.domain.model.Project
+import io.github.alinourix.taski.core.domain.model.Tag
 import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.domain.model.TaskStatus
+import io.github.alinourix.taski.core.domain.repository.PreferencesRepository
 import io.github.alinourix.taski.core.domain.repository.ProjectRepository
+import io.github.alinourix.taski.core.domain.repository.TagRepository
 import io.github.alinourix.taski.core.domain.repository.TaskRepository
 import io.github.alinourix.taski.core.domain.time.Clock
 import io.github.alinourix.taski.core.domain.timer.FocusTimerController
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -63,24 +67,34 @@ data class ProjectDetailState(
     val subtasks: Map<String, List<TaskItem>> = emptyMap(),
     val done: List<TaskItem> = emptyList(),
     val timer: FocusTimerState? = null,
-)
+    val tags: List<Tag> = emptyList(),
+    val projects: List<Project> = emptyList(),
+) {
+    fun find(id: String): TaskItem? = (open + done).firstOrNull { it.id == id } ?: subtasks.values.firstNotNullOfOrNull { list -> list.firstOrNull { it.id == id } }
+}
 
 @HiltViewModel
 class ProjectViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val tasks: TaskRepository,
     private val projects: ProjectRepository,
+    tags: TagRepository,
+    preferences: PreferencesRepository,
     clock: Clock,
     timer: FocusTimerController,
 ) : ViewModel() {
     val projectId: String? = savedState.toRoute<ProjectRoute>().id
-    val actions = TaskActions(tasks, clock, viewModelScope)
+    private val defaultMinutes = preferences.preferences.map { it.defaultTimerMinutes }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, FocusTimerState.DEFAULT_MINUTES)
+    val actions = TaskActions(tasks, tags, clock, viewModelScope, timer) { defaultMinutes.value }
+
+    private val catalog = combine(tags.observeTags(), projects.observeProjects(), timer.active) { t, p, a -> Triple(t, p, a) }
 
     val state: StateFlow<ProjectDetailState> = combine(
         tasks.observeItems(),
         projectId?.let(projects::observeProject) ?: flowOf(null),
-        timer.active,
-    ) { items, project, active ->
+        catalog,
+    ) { items, project, (allTags, allProjects, active) ->
         val order = compareBy<TaskItem>({ it.task.sortKey }, { it.id })
         val mine = items.filter { it.task.projectId == projectId }
         val roots = mine.filter { it.task.parentId == null || mine.none { p -> p.id == it.task.parentId } }
@@ -92,6 +106,8 @@ class ProjectViewModel @Inject constructor(
             subtasks = mine.filter { it.task.parentId != null }.groupBy { it.task.parentId!! }.mapValues { it.value.sortedWith(order) },
             done = roots.filter { it.task.status == TaskStatus.Done }.sortedWith(order),
             timer = active,
+            tags = allTags,
+            projects = allProjects,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProjectDetailState())
 

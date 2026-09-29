@@ -122,4 +122,16 @@
     <string name="task_deleted">Task moved to the trash</string>
     <string name="task_completed">Task completed</string>
     <string name="task_rolled">Next one is due %s</string>
+    <string name="task_open">Open page</string>
+    <string name="task_focus">Start focus</string>
+    <string name="task_copy_markdown">Copy as Obsidian line</string>
+    <string name="task_copied">Copied</string>
+    <string name="task_add_progress">Progress bar</string>
+    <string name="task_add_timer">Focus timer</string>
+    <string name="task_capabilities">Add capability</string>
+    <string name="task_properties">Properties</string>
+    <string name="task_rename">Rename</string>
+    <string name="task_new_in_group">New</string>
+    <string name="task_new_hint">Task name</string>
+    <string name="task_timer_minutes">%d min timer</string>
 </resources>

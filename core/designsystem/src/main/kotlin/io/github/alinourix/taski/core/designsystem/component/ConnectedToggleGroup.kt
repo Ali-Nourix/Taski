@@ -3,6 +3,7 @@ package io.github.alinourix.taski.core.designsystem.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Icon
@@ -16,6 +17,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -33,6 +35,8 @@ fun <T> ConnectedToggleGroup(
     icon: ((T) -> ImageVector)? = null,
     showLabels: Boolean = true,
     fillWidth: Boolean = true,
+    /** A shorter group, for toolbars where the buttons are chrome rather than content. */
+    height: Dp? = null,
 ) {
     Row(
         modifier = if (fillWidth) modifier.fillMaxWidth() else modifier,
@@ -43,7 +47,9 @@ fun <T> ConnectedToggleGroup(
             ToggleButton(
                 checked = checked,
                 onCheckedChange = { onSelect(option) },
-                modifier = (if (fillWidth) Modifier.weight(1f) else Modifier).semantics { role = Role.RadioButton },
+                modifier = (if (fillWidth) Modifier.weight(1f) else Modifier)
+                    .then(if (height != null) Modifier.height(height) else Modifier)
+                    .semantics { role = Role.RadioButton },
                 shapes = when (index) {
                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                     options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()

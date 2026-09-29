@@ -149,8 +149,8 @@ fun SettingsScreen(
                     })
                     SwitchRow(
                         4, 5, stringResource(R.string.settings_dynamic_color),
-                        current.dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-                        { v -> viewModel.update { it.copy(dynamicColor = v) } },
+                        current.materialYou && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+                        { v -> viewModel.update { it.copy(materialYou = v) } },
                         supporting = stringResource(R.string.settings_dynamic_color_body),
                         icon = Icons.Rounded.Palette,
                     )

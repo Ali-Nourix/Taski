@@ -51,4 +51,14 @@
     <string name="bucket_past">Past</string>
     <string name="bucket_none">No deadline</string>
     <string name="group_all">All</string>
+    <string name="board_layout_table">Table</string>
+    <string name="board_new">New</string>
+    <string name="board_search_open">Search</string>
+    <string name="col_task">Task</string>
+    <string name="col_status">Status</string>
+    <string name="col_due">Due</string>
+    <string name="col_priority">Priority</string>
+    <string name="col_tags">Tags</string>
+    <string name="col_progress">Progress</string>
+    <string name="col_project">Project</string>
 </resources>

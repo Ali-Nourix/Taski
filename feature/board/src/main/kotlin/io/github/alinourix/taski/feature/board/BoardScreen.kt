@@ -1,28 +1,20 @@
 package io.github.alinourix.taski.feature.board
 
-import android.content.ClipData
-import android.content.ClipDescription
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.draganddrop.dragAndDropSource
-import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -33,18 +25,21 @@ import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.ExpandLess
-import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.FilterAltOff
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.SpaceDashboard
+import androidx.compose.material.icons.rounded.TableChart
 import androidx.compose.material.icons.rounded.TableRows
 import androidx.compose.material.icons.rounded.ViewColumn
 import androidx.compose.material.icons.rounded.Workspaces
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
@@ -55,12 +50,13 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,24 +65,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draganddrop.DragAndDropEvent
-import androidx.compose.ui.draganddrop.DragAndDropTarget
-import androidx.compose.ui.draganddrop.DragAndDropTransferData
-import androidx.compose.ui.draganddrop.mimeTypes
-import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.ButtonGroup
-import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.ToggleButton
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.alinourix.taski.core.designsystem.component.ConnectedToggleGroup
 import io.github.alinourix.taski.core.designsystem.component.EmptyState
-import io.github.alinourix.taski.core.designsystem.component.GroupedShapes
 import io.github.alinourix.taski.core.designsystem.component.LoadingState
 import io.github.alinourix.taski.core.domain.model.GroupBy
 import io.github.alinourix.taski.core.domain.model.Priority
@@ -94,38 +80,45 @@ import io.github.alinourix.taski.core.domain.model.SortKey
 import io.github.alinourix.taski.core.domain.model.TaskStatus
 import io.github.alinourix.taski.core.domain.model.ViewDefinition
 import io.github.alinourix.taski.core.domain.model.ViewLayout
-import io.github.alinourix.taski.core.domain.query.TaskGroup
 import io.github.alinourix.taski.core.ui.LocalUiConfig
-import io.github.alinourix.taski.core.ui.component.RowExtras
-import io.github.alinourix.taski.core.ui.component.SwipeableTaskRow
 import io.github.alinourix.taski.core.ui.component.TaskEventsEffect
-import io.github.alinourix.taski.core.ui.component.TaskRow
+import io.github.alinourix.taski.core.ui.component.TaskProperty
+import io.github.alinourix.taski.core.ui.component.TaskSheetHost
+import io.github.alinourix.taski.core.ui.component.rememberTaskSheetState
 import io.github.alinourix.taski.core.ui.format.TaskIcons
 import io.github.alinourix.taski.core.ui.format.localizeDigits
 import io.github.alinourix.taski.core.ui.format.priorityLabel
 import io.github.alinourix.taski.core.ui.format.statusLabel
 import io.github.alinourix.taski.core.ui.picker.OptionItem
 import io.github.alinourix.taski.core.ui.picker.PickerSheet
-import io.github.alinourix.taski.core.ui.picker.StatusSheet
 import io.github.alinourix.taski.core.ui.theme.roles
 import io.github.alinourix.taski.core.ui.R as UiR
 
-private enum class FilterSheet { Status, Priority, Tags, Project }
+internal enum class FilterSheet { Status, Priority, Tags, Project }
 
+/**
+ * Every task as a database, the plugin board's way: three views of the same
+ * rows (list, table, board), filters, grouping and sorting, saved views, and
+ * editing in place — a tapped property opens its picker, "+ New" in a group
+ * adds a task that already belongs there.
+ */
 @Composable
 fun BoardScreen(
     onOpenTask: (String) -> Unit,
     onManageTags: () -> Unit,
     onAddTask: () -> Unit,
+    onOpenTimer: () -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(),
     viewModel: BoardViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val query by viewModel.search.collectAsStateWithLifecycle()
-    TaskEventsEffect(viewModel.actions)
+    TaskEventsEffect(viewModel.actions, onFocusStarted = onOpenTimer)
+    val sheet = rememberTaskSheetState()
     var filterSheet by rememberSaveable { mutableStateOf<FilterSheet?>(null) }
-    var statusFor by rememberSaveable { mutableStateOf<String?>(null) }
     var saving by rememberSaveable { mutableStateOf(false) }
+    var searching by rememberSaveable { mutableStateOf(false) }
+    val showSearch = searching || query.isNotEmpty()
 
     Scaffold(
         contentWindowInsets = WindowInsets(0),
@@ -133,31 +126,37 @@ fun BoardScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.board_title), style = MaterialTheme.typography.titleLargeEmphasized) },
                 actions = {
+                    IconButton(onClick = { searching = !showSearch; if (!searching) viewModel.search.value = "" }, shapes = IconButtonDefaults.shapes()) {
+                        Icon(if (showSearch) Icons.Rounded.SearchOff else Icons.Rounded.Search, stringResource(R.string.board_search_open))
+                    }
                     IconButton(onClick = onManageTags, shapes = IconButtonDefaults.shapes()) {
                         Icon(Icons.Rounded.Sell, stringResource(R.string.board_manage_tags))
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
             )
         },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
             Column(Modifier.fillMaxSize()) {
-                SearchField(query) { viewModel.search.value = it }
+                ViewTabs(state.view.layout, viewModel::setLayout)
+                AnimatedVisibility(showSearch) { SearchField(query) { viewModel.search.value = it } }
                 ViewsRow(state, onApply = viewModel::apply, onDelete = viewModel::deleteView)
                 FiltersRow(state.view, onOpen = { filterSheet = it }, onClear = viewModel::clearFilters)
                 Summary(state)
+                val onEdit = { id: String -> { property: TaskProperty -> sheet.open(id, property) } }
                 when {
                     state.loading -> LoadingState()
                     state.totalTasks == 0 -> EmptyState(Icons.Rounded.SpaceDashboard, stringResource(R.string.board_empty), body = stringResource(R.string.board_empty_body))
                     state.groups.all { it.items.isEmpty() } && state.view.groupBy != GroupBy.Status ->
                         EmptyState(Icons.Rounded.FilterAltOff, stringResource(R.string.board_empty_filtered))
-                    state.view.layout == ViewLayout.List -> ListLayout(state, viewModel, onOpenTask, { statusFor = it }, contentPadding)
-                    else -> BoardLayout(state, viewModel, onOpenTask, contentPadding)
+                    state.view.layout == ViewLayout.List -> BoardList(state, viewModel, onOpenTask, onEdit, contentPadding)
+                    state.view.layout == ViewLayout.Table -> BoardTable(state, viewModel, onOpenTask, onEdit, contentPadding)
+                    else -> BoardColumns(state, viewModel, onOpenTask, onEdit, contentPadding)
                 }
             }
             Toolbar(
                 state.view,
-                onLayout = viewModel::setLayout,
                 onGroup = viewModel::setGroupBy,
                 onSort = viewModel::setSort,
                 onToggleSubtasks = viewModel::toggleSubtasks,
@@ -199,14 +198,32 @@ fun BoardScreen(
         null -> Unit
     }
 
-    statusFor?.let { id ->
-        val item = state.groups.flatMap { it.items }.firstOrNull { it.id == id }
-        if (item == null) statusFor = null else {
-            StatusSheet(item.task.status, onDismiss = { statusFor = null }) { viewModel.actions.setStatus(item, it); statusFor = null }
-        }
-    }
-
+    TaskSheetHost(sheet, state::find, state.tags, state.projects, viewModel.actions, onOpenTask)
     if (saving) SaveViewDialog(onDismiss = { saving = false }) { viewModel.saveView(it); saving = false }
+}
+
+/** The three views of the same rows, as a connected button group. */
+@Composable
+private fun ViewTabs(layout: ViewLayout, onSelect: (ViewLayout) -> Unit) {
+    val labels = mapOf(
+        ViewLayout.List to stringResource(R.string.board_layout_list),
+        ViewLayout.Table to stringResource(R.string.board_layout_table),
+        ViewLayout.Board to stringResource(R.string.board_layout_board),
+    )
+    val icons = mapOf(
+        ViewLayout.List to Icons.AutoMirrored.Rounded.ViewList,
+        ViewLayout.Table to Icons.Rounded.TableChart,
+        ViewLayout.Board to Icons.Rounded.ViewColumn,
+    )
+    ConnectedToggleGroup(
+        options = ViewLayout.entries,
+        selected = layout,
+        onSelect = onSelect,
+        label = labels::getValue,
+        icon = icons::getValue,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+        height = 36.dp,
+    )
 }
 
 @Composable
@@ -218,7 +235,7 @@ private fun SearchField(query: String, onChange: (String) -> Unit) {
         leadingIcon = { Icon(Icons.Rounded.Search, null) },
         trailingIcon = if (query.isNotEmpty()) ({ IconButton(onClick = { onChange("") }) { Icon(Icons.Rounded.Close, stringResource(UiR.string.action_clear)) } }) else null,
         singleLine = true,
-        shape = CircleShape,
+        shape = MaterialTheme.shapes.medium,
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -270,7 +287,7 @@ private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onCl
     val clearLabel = stringResource(R.string.board_clear_filters)
     ButtonGroup(
         overflowIndicator = { menu -> ButtonGroupDefaults.OverflowIndicator(menu) },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
     ) {
         for ((sheet, label, count) in filters) {
             val text = if (count > 0) "$label ${count.toString().localizeDigits(persian)}" else label
@@ -282,7 +299,7 @@ private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onCl
                         onCheckedChange = { onOpen(sheet) },
                         interactionSource = interaction,
                         contentPadding = PaddingValues(horizontal = 10.dp),
-                        modifier = Modifier.weight(1f).animateWidth(interaction),
+                        modifier = Modifier.weight(1f).height(34.dp).animateWidth(interaction),
                     ) {
                         Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
@@ -300,7 +317,7 @@ private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onCl
                         onClick = onClear,
                         interactionSource = interaction,
                         shapes = IconButtonDefaults.shapes(),
-                        modifier = Modifier.animateWidth(interaction),
+                        modifier = Modifier.size(34.dp).animateWidth(interaction),
                     ) { Icon(Icons.Rounded.FilterAltOff, clearLabel) }
                 },
                 menuContent = { menu ->
@@ -321,147 +338,10 @@ private fun Summary(state: BoardState) {
     )
     Text(
         parts.joinToString(" · ").localizeDigits(persian),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 2.dp),
     )
-}
-
-@Composable
-private fun ListLayout(
-    state: BoardState,
-    viewModel: BoardViewModel,
-    onOpenTask: (String) -> Unit,
-    onStatusMenu: (String) -> Unit,
-    contentPadding: PaddingValues,
-) {
-    val titles = state.groups.associate { it.id to groupTitle(it, state.tags, state.projects) }
-    val persian = LocalUiConfig.current.persian
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding() + 104.dp)) {
-        for (group in state.groups) {
-            val collapsed = group.id in state.collapsed
-            if (state.view.groupBy != GroupBy.None) {
-                item(key = "h-" + group.id) {
-                    GroupHeader(titles.getValue(group.id), group.items.size.toString().localizeDigits(persian), collapsed) { viewModel.toggleCollapsed(group.id) }
-                }
-            }
-            if (!collapsed) {
-                itemsIndexed(group.items, key = { _, item -> group.id + "/" + item.id }) { index, item ->
-                    SwipeableTaskRow(
-                        item = item,
-                        onToggle = { viewModel.actions.toggle(item) },
-                        onDelete = { viewModel.actions.delete(item) },
-                        onClick = { onOpenTask(item.id) },
-                        onStatusMenu = { onStatusMenu(item.id) },
-                        extras = RowExtras(showProject = state.view.groupBy != GroupBy.Project, timer = state.timer),
-                        shape = GroupedShapes.forIndex(index, group.items.size),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 1.dp).animateItem(),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun GroupHeader(title: String, count: String, collapsed: Boolean, onToggle: () -> Unit) {
-    Surface(onClick = onToggle, color = Color.Transparent, modifier = Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(start = 20.dp, end = 12.dp, top = 16.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.titleSmallEmphasized, color = MaterialTheme.colorScheme.primary)
-            Text(count, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Box(Modifier.weight(1f))
-            Icon(if (collapsed) Icons.Rounded.ExpandMore else Icons.Rounded.ExpandLess, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-private const val DRAG_LABEL = "taski-task"
-
-@Composable
-private fun BoardLayout(state: BoardState, viewModel: BoardViewModel, onOpenTask: (String) -> Unit, contentPadding: PaddingValues) {
-    val persian = LocalUiConfig.current.persian
-    val groupsById = state.groups.associateBy { it.id }
-    LazyRow(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(state.groups, key = { it.id }) { group ->
-            BoardColumn(
-                title = groupTitle(group, state.tags, state.projects),
-                count = group.items.size.toString().localizeDigits(persian),
-                group = group,
-                onDrop = { taskId, fromId -> viewModel.moveTo(taskId, fromId?.let(groupsById::get), group) },
-            ) {
-                items(group.items, key = { it.id }) { item ->
-                    TaskRow(
-                        item = item,
-                        onToggle = { viewModel.actions.toggle(item) },
-                        onClick = { onOpenTask(item.id) },
-                        extras = RowExtras(showProject = state.view.groupBy != GroupBy.Project, timer = state.timer),
-                        modifier = Modifier
-                            .padding(vertical = 3.dp)
-                            .animateItem()
-                            .dragAndDropSource { _ ->
-                                DragAndDropTransferData(ClipData.newPlainText(DRAG_LABEL, "${item.id}|${group.id}"))
-                            },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BoardColumn(
-    title: String,
-    count: String,
-    group: TaskGroup,
-    onDrop: (taskId: String, fromGroupId: String?) -> Unit,
-    content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit,
-) {
-    var hovering by remember { mutableStateOf(false) }
-    val container by animateColorAsState(
-        if (hovering) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-        MaterialTheme.motionScheme.fastEffectsSpec(),
-        label = "column",
-    )
-    val target = remember(group.id) {
-        object : DragAndDropTarget {
-            override fun onDrop(event: DragAndDropEvent): Boolean {
-                hovering = false
-                val text = event.toAndroidDragEvent().clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString() ?: return false
-                val taskId = text.substringBefore('|')
-                onDrop(taskId, text.substringAfter('|', "").ifEmpty { null })
-                return true
-            }
-
-            override fun onEntered(event: DragAndDropEvent) { hovering = true }
-            override fun onExited(event: DragAndDropEvent) { hovering = false }
-            override fun onEnded(event: DragAndDropEvent) { hovering = false }
-        }
-    }
-    Surface(
-        color = container,
-        shape = MaterialTheme.shapes.extraLarge,
-        modifier = Modifier.width(304.dp).fillMaxHeight().dragAndDropTarget(
-            shouldStartDragAndDrop = { event -> event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN) },
-            target = target,
-        ),
-    ) {
-        Column {
-            Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(title, style = MaterialTheme.typography.titleMediumEmphasized, modifier = Modifier.weight(1f))
-                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHighest) {
-                    Text(count, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
-                }
-            }
-            if (hovering) {
-                Text(stringResource(R.string.board_drop_here), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.padding(horizontal = 16.dp))
-            }
-            LazyColumn(Modifier.fillMaxWidth().padding(horizontal = 8.dp), content = content)
-        }
-    }
 }
 
 /**
@@ -471,7 +351,6 @@ private fun BoardColumn(
 @Composable
 private fun Toolbar(
     view: ViewDefinition,
-    onLayout: (ViewLayout) -> Unit,
     onGroup: (GroupBy) -> Unit,
     onSort: (SortKey) -> Unit,
     onToggleSubtasks: () -> Unit,
@@ -491,14 +370,6 @@ private fun Toolbar(
         modifier = modifier,
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
     ) {
-        // One button that shows the layout it switches to.
-        val toBoard = view.layout == ViewLayout.List
-        IconButton(onClick = { onLayout(if (toBoard) ViewLayout.Board else ViewLayout.List) }) {
-            Icon(
-                if (toBoard) Icons.Rounded.ViewColumn else Icons.AutoMirrored.Rounded.ViewList,
-                stringResource(if (toBoard) R.string.board_layout_board else R.string.board_layout_list),
-            )
-        }
         Box {
             IconButton(onClick = { groupMenu = true }) { Icon(Icons.Rounded.TableRows, stringResource(R.string.board_group)) }
             DropdownMenu(expanded = groupMenu, onDismissRequest = { groupMenu = false }) {

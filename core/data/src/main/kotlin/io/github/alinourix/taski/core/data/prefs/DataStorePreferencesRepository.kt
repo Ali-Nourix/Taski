@@ -45,7 +45,7 @@ class DataStorePreferencesRepository @Inject constructor(
             language = AppLanguage.fromCode(p[Keys.language]),
             calendar = CalendarSystem.fromCode(p[Keys.calendar]),
             themeMode = ThemeMode.fromCode(p[Keys.theme]),
-            dynamicColor = p[Keys.dynamicColor] ?: defaults.dynamicColor,
+            materialYou = p[Keys.materialYou] ?: defaults.materialYou,
             density = Density.fromCode(p[Keys.density]),
             lastTab = p[Keys.lastTab] ?: defaults.lastTab,
             board = ViewDefinition.decode(p[Keys.board]) ?: defaults.board,
@@ -82,7 +82,7 @@ class DataStorePreferencesRepository @Inject constructor(
         p[Keys.language] = u.language.code
         p[Keys.calendar] = u.calendar.code
         p[Keys.theme] = u.themeMode.code
-        p[Keys.dynamicColor] = u.dynamicColor
+        p[Keys.materialYou] = u.materialYou
         p[Keys.density] = u.density.code
         p[Keys.lastTab] = u.lastTab
         p[Keys.board] = u.board.encode()
@@ -117,7 +117,7 @@ class DataStorePreferencesRepository @Inject constructor(
         val language = stringPreferencesKey("language")
         val calendar = stringPreferencesKey("calendar")
         val theme = stringPreferencesKey("theme_mode")
-        val dynamicColor = booleanPreferencesKey("dynamic_color")
+        val materialYou = booleanPreferencesKey("material_you")
         val density = stringPreferencesKey("density")
         val lastTab = stringPreferencesKey("last_tab")
         val board = stringPreferencesKey("board_view")

@@ -7,13 +7,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Segmented list shapes: items in a group sit 2dp apart, with large outer
- * corners on the group and small inner ones, the list style of Material 3
- * Expressive settings screens.
+ * Segmented list shapes: items in a group sit 2dp apart, with outer corners
+ * on the group and near-square inner ones, so a group reads as one quiet block.
  */
 object GroupedShapes {
-    val Outer: Dp = 24.dp
-    val Inner: Dp = 6.dp
+    val Outer: Dp = 12.dp
+    val Inner: Dp = 3.dp
     val Gap: Dp = 2.dp
 
     @Stable
