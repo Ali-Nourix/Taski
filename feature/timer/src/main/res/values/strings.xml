@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="timer_title">Focus</string>
+    <string name="timer_pick_task">Choose a task</string>
+    <string name="timer_pick_hint">Focus on one task for a set time. The timer keeps running when you leave the app.</string>
+    <string name="timer_search">Search tasks</string>
+    <string name="timer_minutes">%d min</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_reset">Reset</string>
+    <string name="timer_stop">Stop</string>
+    <string name="timer_add">+%d</string>
+    <string name="timer_change_task">Change task</string>
+    <string name="timer_focused_total">%s focused on this task so far</string>
+    <string name="timer_open_task">Open task</string>
+    <string name="timer_paused">Paused</string>
+</resources>

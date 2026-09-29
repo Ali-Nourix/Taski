@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="projects_title">پروژه‌ها</string>
+    <string name="projects_empty">هنوز پروژه‌ای نیست</string>
+    <string name="projects_empty_body">پروژه‌ها همان یادداشت‌های والت شما روی گوشی‌اند: تسک‌ها را همان‌طور گروه کنید.</string>
+    <string name="projects_new">پروژه جدید</string>
+    <string name="projects_edit">ویرایش پروژه</string>
+    <string name="projects_name">نام</string>
+    <string name="projects_delete">حذف پروژه</string>
+    <string name="projects_delete_body">تسک‌هایش به صندوق ورودی می‌روند. چیز دیگری حذف نمی‌شود.</string>
+    <string name="projects_open_count">%1$d باز · %2$d انجام شده</string>
+    <string name="projects_reorder">برای جابه‌جایی بکشید</string>
+    <string name="project_add_task">افزودن تسک</string>
+    <string name="project_empty">هنوز چیزی اینجا نیست</string>
+    <string name="project_show_done">انجام شده</string>
+</resources>

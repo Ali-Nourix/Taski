@@ -79,7 +79,6 @@ object DataProvidesModule {
     @ApplicationScope
     fun applicationScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    @Provides fun reminderStateDao(db: TaskiDatabase) = db.reminderStateDao()
 }
 
 @Module
@@ -94,4 +93,5 @@ abstract class DataBindsModule {
     @Binds abstract fun preferences(impl: DataStorePreferencesRepository): PreferencesRepository
     @Binds abstract fun transfer(impl: DefaultTransferRepository): TransferRepository
     @Binds abstract fun sync(impl: NoOpSyncEngine): SyncEngine
+    @Binds abstract fun reminderState(impl: io.github.alinourix.taski.core.data.repository.DefaultReminderStateRepository): io.github.alinourix.taski.core.domain.repository.ReminderStateRepository
 }

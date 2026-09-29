@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_title">Today</string>
+    <string name="today_overdue">Overdue</string>
+    <string name="today_due">Due today</string>
+    <string name="today_in_progress">In progress</string>
+    <string name="today_upcoming">Coming up</string>
+    <string name="today_done">Done today</string>
+    <string name="today_all_clear">All clear for today</string>
+    <string name="today_all_clear_body">Nothing is due. Add a task with the button below, or plan the week from the board.</string>
+    <string name="today_progress">%1$d of %2$d done</string>
+    <string name="today_stat_open">Open</string>
+    <string name="today_stat_overdue">Overdue</string>
+    <string name="today_stat_focus">Focused</string>
+</resources>

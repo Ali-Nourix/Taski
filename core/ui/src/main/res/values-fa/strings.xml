@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="status_not_started">شروع نشده</string>
+    <string name="status_in_progress">در حال انجام</string>
+    <string name="status_done">انجام شده</string>
+    <string name="status_not_done">انجام نشده</string>
+
+    <string name="priority_highest">بحرانی</string>
+    <string name="priority_high">زیاد</string>
+    <string name="priority_medium">متوسط</string>
+    <string name="priority_low">کم</string>
+    <string name="priority_lowest">خیلی کم</string>
+    <string name="priority_none">بدون اولویت</string>
+
+    <string name="due_today">امروز</string>
+    <string name="due_tomorrow">فردا</string>
+    <string name="due_yesterday">دیروز</string>
+    <plurals name="due_days_left">
+        <item quantity="one">%d روز مانده</item>
+        <item quantity="other">%d روز مانده</item>
+    </plurals>
+    <plurals name="due_days_overdue">
+        <item quantity="one">%d روز عقب افتاده</item>
+        <item quantity="other">%d روز عقب افتاده</item>
+    </plurals>
+    <string name="due_met">به‌موقع انجام شد</string>
+    <string name="no_date">بدون تاریخ</string>
+
+    <string name="repeat_every_day">هر روز</string>
+    <string name="repeat_every_week">هر هفته</string>
+    <string name="repeat_every_month">هر ماه</string>
+    <plurals name="repeat_every_n_days">
+        <item quantity="one">هر روز</item>
+        <item quantity="other">هر %d روز</item>
+    </plurals>
+    <plurals name="repeat_every_n_weeks">
+        <item quantity="one">هر هفته</item>
+        <item quantity="other">هر %d هفته</item>
+    </plurals>
+    <plurals name="repeat_every_n_months">
+        <item quantity="one">هر ماه</item>
+        <item quantity="other">هر %d ماه</item>
+    </plurals>
+    <string name="repeat_none">تکرار نمی‌شود</string>
+    <string name="repeat_custom">دلخواه</string>
+    <string name="repeat_every">هر</string>
+    <string name="unit_days">روز</string>
+    <string name="unit_weeks">هفته</string>
+    <string name="unit_months">ماه</string>
+    <string name="repeat_hint">از سررسید حساب می‌شود؛ تسک هفتگی حتی اگر دیر انجام شود روز هفته‌اش را نگه می‌دارد.</string>
+
+    <string name="reminder_none">بدون یادآوری</string>
+    <string name="reminder_at_time">سر وقت</string>
+    <plurals name="reminder_minutes_before">
+        <item quantity="one">%d دقیقه قبل</item>
+        <item quantity="other">%d دقیقه قبل</item>
+    </plurals>
+    <plurals name="reminder_hours_before">
+        <item quantity="one">%d ساعت قبل</item>
+        <item quantity="other">%d ساعت قبل</item>
+    </plurals>
+    <plurals name="reminder_days_before">
+        <item quantity="one">%d روز قبل</item>
+        <item quantity="other">%d روز قبل</item>
+    </plurals>
+
+    <string name="inbox">صندوق ورودی</string>
+    <string name="no_tag">بدون برچسب</string>
+    <string name="subtasks_count">%1$d/%2$d</string>
+    <string name="blocked">مسدود</string>
+    <string name="percent">%d٪</string>
+    <plurals name="minutes_short">
+        <item quantity="one">%d دقیقه</item>
+        <item quantity="other">%d دقیقه</item>
+    </plurals>
+
+    <string name="action_save">ذخیره</string>
+    <string name="action_cancel">انصراف</string>
+    <string name="action_delete">حذف</string>
+    <string name="action_done">تمام</string>
+    <string name="action_undo">واگرد</string>
+    <string name="action_add">افزودن</string>
+    <string name="action_create">ساختن</string>
+    <string name="action_clear">پاک کردن</string>
+    <string name="action_back">بازگشت</string>
+    <string name="action_more">گزینه‌های بیشتر</string>
+    <string name="action_close">بستن</string>
+    <string name="action_edit">ویرایش</string>
+    <string name="action_rename">تغییر نام</string>
+
+    <string name="pick_date">سررسید</string>
+    <string name="pick_time">ساعت</string>
+    <string name="add_time">افزودن ساعت</string>
+    <string name="remove_time">حذف ساعت</string>
+    <string name="next_week">هفته بعد</string>
+    <string name="previous_month">ماه قبل</string>
+    <string name="next_month">ماه بعد</string>
+    <string name="pick_priority">اولویت</string>
+    <string name="pick_repeat">تکرار</string>
+    <string name="pick_reminder">یادآوری</string>
+    <string name="pick_tags">برچسب‌ها</string>
+    <string name="pick_project">پروژه</string>
+    <string name="pick_status">وضعیت</string>
+    <string name="tag_search">جستجو یا ساختن برچسب</string>
+    <string name="tag_create">ساختن «%s»</string>
+    <string name="tag_color">رنگ</string>
+    <string name="color_custom">رنگ دلخواه</string>
+    <string name="color_red">قرمز</string>
+    <string name="color_orange">نارنجی</string>
+    <string name="color_yellow">زرد</string>
+    <string name="color_green">سبز</string>
+    <string name="color_cyan">فیروزه‌ای</string>
+    <string name="color_blue">آبی</string>
+    <string name="color_purple">بنفش</string>
+    <string name="color_pink">صورتی</string>
+    <string name="color_gray">خاکستری</string>
+
+    <string name="task_checkbox_toggle">علامت انجام شده یا شروع نشده</string>
+    <string name="task_checkbox_state">وضعیت: %s</string>
+    <string name="swipe_complete">انجام شد</string>
+    <string name="swipe_delete">حذف</string>
+    <string name="task_deleted">تسک به سطل زباله رفت</string>
+    <string name="task_completed">تسک انجام شد</string>
+    <string name="task_rolled">مورد بعدی: %s</string>
+</resources>

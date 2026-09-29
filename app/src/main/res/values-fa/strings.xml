@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">تسکی</string>
+    <string name="nav_today">امروز</string>
+    <string name="nav_board">بورد</string>
+    <string name="nav_projects">پروژه‌ها</string>
+    <string name="nav_settings">تنظیمات</string>
+    <string name="fab_menu">ساختن</string>
+    <string name="fab_new_task">تسک جدید</string>
+    <string name="fab_focus">تایمر تمرکز</string>
+    <string name="fab_close">بستن منو</string>
+    <string name="digest_sent">خلاصه ارسال شد</string>
+    <string name="digest_nothing">در حال حاضر چیزی برای یادآوری وجود ندارد</string>
+</resources>

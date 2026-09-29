@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="board_title">Board</string>
+    <string name="board_search">Search tasks, tags, projects</string>
+    <string name="board_summary_total">%d tasks</string>
+    <string name="board_summary_done">%d done</string>
+    <string name="board_summary_overdue">%d overdue</string>
+    <string name="board_layout_list">List</string>
+    <string name="board_layout_board">Board</string>
+    <string name="board_group">Group</string>
+    <string name="board_sort">Sort</string>
+    <string name="board_filter_status">Status</string>
+    <string name="board_filter_priority">Priority</string>
+    <string name="board_filter_tags">Tags</string>
+    <string name="board_filter_project">Project</string>
+    <string name="board_clear_filters">Clear filters</string>
+    <string name="board_show_subtasks">Show subtasks</string>
+    <string name="board_empty">No tasks yet</string>
+    <string name="board_empty_body">Add one with the button, or import a note from Obsidian in Settings.</string>
+    <string name="board_empty_filtered">No task matches the search and filters</string>
+    <string name="board_save_view">Save view</string>
+    <string name="board_save_view_name">View name</string>
+    <string name="board_delete_view">Delete view “%s”</string>
+    <string name="board_all">All tasks</string>
+    <string name="board_manage_tags">Manage tags</string>
+    <string name="board_ascending">Ascending</string>
+    <string name="board_descending">Descending</string>
+    <string name="board_drop_here">Drop here</string>
+
+    <string name="group_none">No grouping</string>
+    <string name="group_status">Status</string>
+    <string name="group_tag">Tag</string>
+    <string name="group_priority">Priority</string>
+    <string name="group_deadline">Deadline</string>
+    <string name="group_project">Project</string>
+
+    <string name="sort_manual">Manual order</string>
+    <string name="sort_title">Title</string>
+    <string name="sort_status">Status</string>
+    <string name="sort_priority">Priority</string>
+    <string name="sort_deadline">Deadline</string>
+    <string name="sort_progress">Progress</string>
+    <string name="sort_project">Project</string>
+    <string name="sort_created">Created</string>
+
+    <string name="bucket_overdue">Overdue</string>
+    <string name="bucket_today">Today</string>
+    <string name="bucket_week">Next 7 days</string>
+    <string name="bucket_later">Later</string>
+    <string name="bucket_past">Past</string>
+    <string name="bucket_none">No deadline</string>
+    <string name="group_all">All</string>
+</resources>

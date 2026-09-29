@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Taski</string>
+    <string name="nav_today">Today</string>
+    <string name="nav_board">Board</string>
+    <string name="nav_projects">Projects</string>
+    <string name="nav_settings">Settings</string>
+    <string name="fab_menu">Create</string>
+    <string name="fab_new_task">New task</string>
+    <string name="fab_focus">Focus timer</string>
+    <string name="fab_close">Close menu</string>
+    <string name="digest_sent">Digest sent</string>
+    <string name="digest_nothing">Nothing to remind you about right now</string>
+</resources>

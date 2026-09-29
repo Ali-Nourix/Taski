@@ -58,3 +58,20 @@ class DefaultActivityRepository @Inject constructor(db: TaskiDatabase) : Activit
     override fun observeForRow(rowId: String): Flow<List<ActivityEntry>> =
         history.observeActivity(rowId).map { rows -> rows.mapNotNull { it.toDomain() } }
 }
+
+@Singleton
+class DefaultReminderStateRepository @Inject constructor(db: TaskiDatabase) : io.github.alinourix.taski.core.domain.repository.ReminderStateRepository {
+    private val dao = db.reminderStateDao()
+
+    override suspend fun all() = dao.all().map { it.toRecord() }
+
+    override suspend fun get(taskId: String) = dao.get(taskId)?.toRecord()
+
+    override suspend fun put(record: io.github.alinourix.taski.core.domain.repository.ReminderRecord) =
+        dao.upsert(io.github.alinourix.taski.core.data.db.entity.ReminderStateEntity(record.taskId, record.scheduledAt, record.deliveredKey, record.snoozedUntil))
+
+    override suspend fun remove(taskIds: List<String>) = if (taskIds.isEmpty()) Unit else dao.delete(taskIds)
+
+    private fun io.github.alinourix.taski.core.data.db.entity.ReminderStateEntity.toRecord() =
+        io.github.alinourix.taski.core.domain.repository.ReminderRecord(taskId, scheduledAt, deliveredKey, snoozedUntil)
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_reminders">Task reminders</string>
+    <string name="channel_reminders_body">A task’s own reminder before it is due</string>
+    <string name="channel_digest">Daily digest</string>
+    <string name="channel_digest_quiet">Daily digest (gentle)</string>
+    <string name="channel_digest_strict">Daily digest (strict)</string>
+    <string name="channel_timer">Focus timer</string>
+    <string name="channel_timer_done">Focus timer finished</string>
+
+    <string name="reminder_title">Task reminder</string>
+    <plurals name="digest_title">
+        <item quantity="one">You have %d task that needs attention</item>
+        <item quantity="other">You have %d tasks that need attention</item>
+    </plurals>
+    <string name="digest_more">and %d more…</string>
+    <string name="due_overdue">Overdue</string>
+    <string name="due_today">Due today</string>
+    <string name="due_tomorrow">Due tomorrow</string>
+    <string name="due_days_left">%d days left</string>
+    <string name="due_none">No deadline</string>
+    <string name="action_done">Done</string>
+    <string name="action_snooze">Snooze %d min</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_add_five">+5 min</string>
+    <string name="timer_running">Focusing</string>
+    <string name="timer_paused">Paused · %s left</string>
+    <string name="timer_done_title">Time is up</string>
+    <string name="timer_done_body">%s</string>
+
+    <string name="alert_acknowledge">I understand</string>
+    <string name="alert_acknowledge_in">I understand (%d s)</string>
+    <string name="alert_dismiss">Dismiss</string>
+    <string name="alert_strict_hint">Strict mode: this alert must be acknowledged.</string>
+    <string name="alert_open">Open</string>
+</resources>

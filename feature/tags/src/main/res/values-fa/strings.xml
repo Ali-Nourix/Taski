@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tags_title">برچسب‌ها</string>
+    <string name="tags_new">برچسب جدید</string>
+    <string name="tags_edit">ویرایش برچسب</string>
+    <string name="tags_name">نام</string>
+    <string name="tags_delete">حذف برچسب</string>
+    <string name="tags_delete_body">«%s» از همه تسک‌هایی که آن را دارند برداشته می‌شود. خود تسک‌ها می‌مانند.</string>
+    <plurals name="tags_usage">
+        <item quantity="one">%d تسک</item>
+        <item quantity="other">%d تسک</item>
+    </plurals>
+    <string name="tags_empty">هنوز برچسبی نیست</string>
+    <string name="tags_empty_body">برچسب‌ها نشانه‌های خود شما هستند — کار، مشتری، کار عمیق — هر کدام با رنگ خودش.</string>
+    <string name="tags_reorder">برای جابه‌جایی بکشید</string>
+    <string name="tags_hint">تغییر نام یا رنگ یک برچسب، روی همه تسک‌ها یکجا اعمال می‌شود.</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="timer_title">تمرکز</string>
+    <string name="timer_pick_task">انتخاب تسک</string>
+    <string name="timer_pick_hint">برای مدتی مشخص روی یک تسک تمرکز کنید. تایمر حتی وقتی از برنامه خارج شوید ادامه می‌دهد.</string>
+    <string name="timer_search">جستجوی تسک‌ها</string>
+    <string name="timer_minutes">%d دقیقه</string>
+    <string name="timer_start">شروع</string>
+    <string name="timer_pause">توقف</string>
+    <string name="timer_resume">ادامه</string>
+    <string name="timer_reset">از نو</string>
+    <string name="timer_stop">پایان</string>
+    <string name="timer_add">+%d</string>
+    <string name="timer_change_task">تغییر تسک</string>
+    <string name="timer_focused_total">تا الان %s روی این تسک تمرکز کرده‌اید</string>
+    <string name="timer_open_task">باز کردن تسک</string>
+    <string name="timer_paused">متوقف</string>
+</resources>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="board_title">بورد</string>
+    <string name="board_search">جستجوی تسک‌ها، برچسب‌ها، پروژه‌ها</string>
+    <string name="board_summary_total">%d تسک</string>
+    <string name="board_summary_done">%d انجام شده</string>
+    <string name="board_summary_overdue">%d عقب افتاده</string>
+    <string name="board_layout_list">فهرست</string>
+    <string name="board_layout_board">بورد</string>
+    <string name="board_group">گروه‌بندی</string>
+    <string name="board_sort">مرتب‌سازی</string>
+    <string name="board_filter_status">وضعیت</string>
+    <string name="board_filter_priority">اولویت</string>
+    <string name="board_filter_tags">برچسب‌ها</string>
+    <string name="board_filter_project">پروژه</string>
+    <string name="board_clear_filters">پاک کردن فیلترها</string>
+    <string name="board_show_subtasks">نمایش زیرتسک‌ها</string>
+    <string name="board_empty">هنوز تسکی نیست</string>
+    <string name="board_empty_body">با دکمه یکی اضافه کنید، یا از تنظیمات یک یادداشت ابسیدین وارد کنید.</string>
+    <string name="board_empty_filtered">هیچ تسکی با جستجو و فیلترها جور نیست</string>
+    <string name="board_save_view">ذخیره نما</string>
+    <string name="board_save_view_name">نام نما</string>
+    <string name="board_delete_view">حذف نمای «%s»</string>
+    <string name="board_all">همه تسک‌ها</string>
+    <string name="board_manage_tags">مدیریت برچسب‌ها</string>
+    <string name="board_ascending">صعودی</string>
+    <string name="board_descending">نزولی</string>
+    <string name="board_drop_here">اینجا رها کنید</string>
+
+    <string name="group_none">بدون گروه‌بندی</string>
+    <string name="group_status">وضعیت</string>
+    <string name="group_tag">برچسب</string>
+    <string name="group_priority">اولویت</string>
+    <string name="group_deadline">سررسید</string>
+    <string name="group_project">پروژه</string>
+
+    <string name="sort_manual">ترتیب دستی</string>
+    <string name="sort_title">عنوان</string>
+    <string name="sort_status">وضعیت</string>
+    <string name="sort_priority">اولویت</string>
+    <string name="sort_deadline">سررسید</string>
+    <string name="sort_progress">پیشرفت</string>
+    <string name="sort_project">پروژه</string>
+    <string name="sort_created">تاریخ ساخت</string>
+
+    <string name="bucket_overdue">عقب افتاده</string>
+    <string name="bucket_today">امروز</string>
+    <string name="bucket_week">۷ روز آینده</string>
+    <string name="bucket_later">بعدتر</string>
+    <string name="bucket_past">گذشته</string>
+    <string name="bucket_none">بدون سررسید</string>
+    <string name="group_all">همه</string>
+</resources>

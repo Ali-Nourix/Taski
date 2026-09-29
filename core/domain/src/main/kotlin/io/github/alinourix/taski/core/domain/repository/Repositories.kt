@@ -113,3 +113,18 @@ interface TransferRepository {
     /** Every live task as a note, one section per project. */
     suspend fun exportMarkdown(): String
 }
+
+/** Delivery bookkeeping for one task's reminder. Local only, and rebuilt from task data at will. */
+data class ReminderRecord(
+    val taskId: String,
+    val scheduledAt: Long?,
+    val deliveredKey: String?,
+    val snoozedUntil: Long?,
+)
+
+interface ReminderStateRepository {
+    suspend fun all(): List<ReminderRecord>
+    suspend fun get(taskId: String): ReminderRecord?
+    suspend fun put(record: ReminderRecord)
+    suspend fun remove(taskIds: List<String>)
+}

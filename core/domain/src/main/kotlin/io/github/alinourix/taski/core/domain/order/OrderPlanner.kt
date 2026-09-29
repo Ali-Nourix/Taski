@@ -14,13 +14,14 @@ object OrderPlanner {
         require(index in 0..keys.size) { "index $index out of 0..${keys.size}" }
         val prev = keys.getOrNull(index - 1)
         val next = keys.getOrNull(index)
-        val clean = (prev == null || FractionalIndex.isValid(prev)) && (next == null || FractionalIndex.isValid(next))
+        // A key that cannot be read (from a buggy or future client) would sort unpredictably, so any one of them triggers a relayout.
+        val clean = keys.all(FractionalIndex::isValid)
         if (clean && (prev == null || next == null || prev < next)) {
             return Placement(FractionalIndex.between(prev, next))
         }
         if (clean && prev != null) {
             var end = index
-            while (end < keys.size && (keys[end] <= prev || !FractionalIndex.isValid(keys[end]))) end++
+            while (end < keys.size && keys[end] <= prev) end++
             val upper = keys.getOrNull(end)
             val fresh = FractionalIndex.nBetween(prev, upper, 1 + end - index)
             return Placement(fresh[0], (index until end).associateWith { fresh[it - index + 1] })

@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
-        val android = extensions.getByName("android") as CommonExtension<*, *, *, *, *, *>
+        val android = extensions.getByName("android") as CommonExtension
         android.buildFeatures.compose = true
 
         tasks.withType<KotlinCompile>().configureEach {

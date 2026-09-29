@@ -16,19 +16,21 @@ internal val Project.libs: VersionCatalog
 internal fun VersionCatalog.lib(alias: String) = findLibrary(alias).get()
 
 internal object TaskiSdk {
-    const val COMPILE = 36
+    const val COMPILE = 37
+    /** Compose 1.13 needs the 37.1 platform. */
+    const val COMPILE_MINOR = 1
     const val TARGET = 36
     const val MIN = 26
 }
 
-internal fun Project.configureAndroid(extension: CommonExtension<*, *, *, *, *, *>) {
+/** Shared Android settings. AGP 9 compiles Kotlin itself, so no Kotlin plugin is applied here. */
+internal fun Project.configureAndroid(extension: CommonExtension) {
     extension.apply {
         compileSdk = TaskiSdk.COMPILE
+        compileSdkMinor = TaskiSdk.COMPILE_MINOR
         defaultConfig.minSdk = TaskiSdk.MIN
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
-        }
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_17
+        compileOptions.targetCompatibility = JavaVersion.VERSION_17
         testOptions.unitTests.isIncludeAndroidResources = true
         testOptions.unitTests.isReturnDefaultValues = true
     }

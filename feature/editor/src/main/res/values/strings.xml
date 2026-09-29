@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="editor_title_hint">Task name</string>
+    <string name="editor_notes_hint">Notes</string>
+    <string name="editor_details">Details</string>
+    <string name="editor_capabilities">Capabilities</string>
+    <string name="editor_capabilities_hint">Nothing is switched on until you add it, so a plain task stays a plain task.</string>
+    <string name="editor_progress">Progress bar</string>
+    <string name="editor_progress_steps">%1$d of %2$d steps</string>
+    <string name="editor_progress_total">Steps</string>
+    <string name="editor_timer">Focus timer</string>
+    <string name="editor_timer_minutes">%d minutes</string>
+    <string name="editor_start_focus">Start focus</string>
+    <string name="editor_remove">Remove</string>
+    <string name="editor_add_capability">Add</string>
+    <string name="editor_subtasks">Subtasks</string>
+    <string name="editor_add_subtask">Add a subtask</string>
+    <string name="editor_parent">Subtask of %s</string>
+    <string name="editor_blocked_by">Waits for</string>
+    <string name="editor_add_dependency">Add a task this one waits for</string>
+    <string name="editor_dependency_refused">That would make the tasks wait for each other</string>
+    <string name="editor_pick_dependency">Waits for…</string>
+    <string name="editor_search_tasks">Search tasks</string>
+    <string name="editor_history">History</string>
+    <string name="editor_completed_on">Completed %s</string>
+    <string name="editor_focused_total">Focused %s in total</string>
+    <string name="editor_created">Created %s</string>
+    <string name="editor_delete">Move to trash</string>
+    <string name="editor_copy_markdown">Copy as Obsidian line</string>
+    <string name="editor_copied">Copied</string>
+    <string name="editor_missing">This task no longer exists.</string>
+    <string name="editor_no_tags">Add tags</string>
+    <string name="editor_status">Status</string>
+
+    <string name="quick_add_hint">What needs doing?</string>
+    <string name="quick_add_syntax">Obsidian markers work too: @due(2026-12-31) @priority(high) @repeat(1w) @tag(work)</string>
+    <string name="quick_add_submit">Add task</string>
+    <string name="quick_add_added">Task added</string>
+
+    <string name="activity_created">Created</string>
+    <string name="activity_status_changed">Status changed</string>
+    <string name="activity_completed">Completed</string>
+    <string name="activity_rolled_forward">Rolled forward to the next date</string>
+    <string name="activity_deleted">Moved to trash</string>
+    <string name="activity_restored">Restored</string>
+    <string name="activity_moved_to_inbox">Moved to the Inbox</string>
+    <string name="activity_cycle_edge_dropped">A link that made a loop was dropped</string>
+</resources>
