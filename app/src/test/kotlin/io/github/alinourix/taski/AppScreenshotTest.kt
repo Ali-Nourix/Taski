@@ -162,6 +162,9 @@ class AppScreenshotTest {
             shoot("timeline-week-more")
             tap("Day")
             shoot("timeline-day")
+            compose.onNode(androidx.compose.ui.test.hasContentDescription("Hour grid")).performClick()
+            settle()
+            shoot("timeline-day-grid")
             tap("Month")
             shoot("timeline-month")
         }
@@ -172,7 +175,11 @@ class AppScreenshotTest {
     fun timelinePersian() {
         seed(persian = true)
         runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.Timeline), lastTab = "board") } }
-        launch().use { shoot("timeline-week-fa") }
+        launch().use {
+            shoot("timeline-week-fa")
+            tap("روز")
+            shoot("timeline-day-fa")
+        }
     }
 
     @Test

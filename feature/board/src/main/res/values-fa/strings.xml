@@ -92,4 +92,16 @@
     <string name="timeline_to_today">رفتن به امروز</string>
     <string name="timeline_add_here">افزودن تسک اینجا</string>
     <string name="board_filters">فیلترها</string>
+    <string name="timeline_morning">صبح</string>
+    <string name="timeline_afternoon">بعدازظهر</string>
+    <string name="timeline_evening">عصر</string>
+    <string name="timeline_now">اکنون</string>
+    <string name="timeline_free">%s آزاد</string>
+    <string name="timeline_view_agenda">برنامه</string>
+    <string name="timeline_view_grid">جدول ساعت</string>
+    <string name="duration_h">%d ساعت</string>
+    <string name="duration_m">%d دقیقه</string>
+    <string name="duration_join">%1$s و %2$s</string>
+    <string name="timeline_prev_week">هفتهٔ قبل</string>
+    <string name="timeline_next_week">هفتهٔ بعد</string>
 </resources>

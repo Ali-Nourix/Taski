@@ -54,3 +54,11 @@ fun ShapeLetter(
         Text(letter, style = MaterialTheme.typography.titleMediumEmphasized, color = contentColor)
     }
 }
+
+private val ProjectShapes = listOf(
+    MaterialShapes.Cookie6Sided, MaterialShapes.Clover4Leaf, MaterialShapes.Sunny, MaterialShapes.Pentagon,
+    MaterialShapes.Cookie9Sided, MaterialShapes.Gem, MaterialShapes.Flower, MaterialShapes.SoftBurst,
+)
+
+/** A project keeps its shape for good: it comes from the id, not from where the project sits in a list. */
+fun projectShape(projectId: String): RoundedPolygon = ProjectShapes[(projectId.hashCode() and Int.MAX_VALUE) % ProjectShapes.size]

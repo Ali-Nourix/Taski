@@ -20,9 +20,9 @@ a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 <img src="docs/screenshots/projects.png" width="260" alt="Projects, each with its own shape">
 </p>
 <p>
+<img src="docs/screenshots/timeline-day.png" width="260" alt="Timeline, a day: an agenda on a rail">
 <img src="docs/screenshots/timeline-week.png" width="260" alt="Timeline, a week: only the days that matter">
 <img src="docs/screenshots/timeline-week-more.png" width="260" alt="A task over five days, with its ribbon and rail">
-<img src="docs/screenshots/timeline-day.png" width="260" alt="Timeline, a day as hours">
 </p>
 <p>
 <img src="docs/screenshots/today-dark.png" width="260" alt="Today in dark, with a running timer">
@@ -69,12 +69,17 @@ status, priority, tag and project colours are muted pastels, an overdue date is
 red, selection is a soft blue container, and the one saturated fill on a page is
 its action.
 
-The **Timeline** is where a task's *from → to* is seen. A **day** is an hour grid
-that opens only around what is there: blocks sit where they are, side by side when
-they overlap, and you press and drag one to move it or drag its edge to change
+The **Timeline** is where a task's *from → to* is seen, and it was shaped by
+studying what works: Tiimo's big weekday and week strip, Structured's rail of
+pills, Google Calendar's Expressive containers. A **day** is an agenda on a rail —
+no empty hours, only what is planned, each task on a pill whose height is how
+long it takes, the part of the day (morning, afternoon, evening) as a soft header,
+"1h 30m free" where a stretch is open (tap it to fill it), a marker for now, and
+the start and end times as buttons. The precise **hour grid** is one tap away: blocks
+sit where they are, and you press and drag one to move it or drag its edge to change
 when it ends. A **week** or a **month** is a plan of only the days that matter:
-each is a large date badge (today's a cookie) with big tonal cards, and the quiet
-stretches fold into "3 free days". A task over several days is a card with a ribbon
+each is a large date badge (today's a cookie) with big tonal cards, the quiet
+stretches folded into "3 free days". A task over several days is a card with a ribbon
 — its first day and its last as two buttons that open their pickers, a wavy line
 for how far along it is — and a rail down the side tying its days together.
 Cards change shape when pressed, as Material 3 Expressive buttons do.

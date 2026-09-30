@@ -53,6 +53,7 @@ import io.github.alinourix.taski.core.designsystem.component.LoadingState
 import io.github.alinourix.taski.core.designsystem.component.SectionHeader
 import io.github.alinourix.taski.core.designsystem.component.ShapeIcon
 import io.github.alinourix.taski.core.designsystem.component.ShapeLetter
+import io.github.alinourix.taski.core.designsystem.component.projectShape
 import io.github.alinourix.taski.core.designsystem.component.sectionRow
 import io.github.alinourix.taski.core.designsystem.theme.AccentRoles
 import io.github.alinourix.taski.core.ui.LocalUiConfig
@@ -209,18 +210,10 @@ private fun NewProjectRow(modifier: Modifier = Modifier, onClick: () -> Unit) {
     }
 }
 
-private val SHAPES = listOf(
-    MaterialShapes.Cookie6Sided, MaterialShapes.Clover4Leaf, MaterialShapes.Sunny, MaterialShapes.Pentagon,
-    MaterialShapes.Cookie9Sided, MaterialShapes.Gem, MaterialShapes.Flower, MaterialShapes.SoftBurst,
-)
-
-/** A project keeps its shape for good: it comes from the id, not from where the project sits in the list. */
-internal fun shapeFor(projectId: String) = SHAPES[(projectId.hashCode() and Int.MAX_VALUE) % SHAPES.size]
-
 /** A project's page icon: its initial in one of the expressive shapes, on its own pastel. */
 @Composable
 internal fun PageIcon(projectId: String, name: String, roles: AccentRoles, size: Dp = 44.dp) {
-    ShapeLetter(name.trim().take(1).uppercase(), polygon = shapeFor(projectId), containerColor = roles.container, contentColor = roles.onContainer, size = size)
+    ShapeLetter(name.trim().take(1).uppercase(), polygon = projectShape(projectId), containerColor = roles.container, contentColor = roles.onContainer, size = size)
 }
 
 @Composable

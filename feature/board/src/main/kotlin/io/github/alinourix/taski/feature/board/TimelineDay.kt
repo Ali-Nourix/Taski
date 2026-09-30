@@ -225,7 +225,7 @@ private fun Expander(label: String, up: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AllDayStrip(entries: List<Pair<TaskItem, Span>>, onOpenTask: (String) -> Unit, onEdit: (String) -> (TaskProperty) -> Unit) {
+internal fun AllDayStrip(entries: List<Pair<TaskItem, Span>>, onOpenTask: (String) -> Unit, onEdit: (String) -> (TaskProperty) -> Unit) {
     Row(Modifier.fillMaxWidth().padding(end = 16.dp, top = 4.dp, bottom = 12.dp)) {
         Text(
             stringResource(R.string.timeline_all_day),

@@ -92,4 +92,16 @@
     <string name="timeline_to_today">Jump to today</string>
     <string name="timeline_add_here">Add a task here</string>
     <string name="board_filters">Filters</string>
+    <string name="timeline_morning">Morning</string>
+    <string name="timeline_afternoon">Afternoon</string>
+    <string name="timeline_evening">Evening</string>
+    <string name="timeline_now">Now</string>
+    <string name="timeline_free">%s free</string>
+    <string name="timeline_view_agenda">Agenda</string>
+    <string name="timeline_view_grid">Hour grid</string>
+    <string name="duration_h">%dh</string>
+    <string name="duration_m">%dm</string>
+    <string name="duration_join">%1$s %2$s</string>
+    <string name="timeline_prev_week">Previous week</string>
+    <string name="timeline_next_week">Next week</string>
 </resources>

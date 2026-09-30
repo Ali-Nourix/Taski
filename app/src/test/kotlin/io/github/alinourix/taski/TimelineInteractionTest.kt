@@ -90,6 +90,24 @@ class TimelineInteractionTest {
     }
 
     @Test
+    fun theAgendaShowsTheFreeStretchBetweenTasks() {
+        val today = clock.today()
+        runBlocking {
+            tasks.create(NewTask("Morning block", startDate = today, startTime = LocalTime.of(9, 0), dueDate = today, dueTime = LocalTime.of(10, 0)))
+            tasks.create(NewTask("Afternoon block", startDate = today, startTime = LocalTime.of(13, 0), dueDate = today, dueTime = LocalTime.of(14, 0)))
+        }
+        ActivityScenario.launch(MainActivity::class.java).use {
+            settle()
+            compose.onAllNodes(hasText("Day") and hasClickAction())[0].performClick()
+            settle()
+            compose.onNodeWithText("Morning block").assertExists()
+            compose.onNodeWithText("Afternoon block").assertExists()
+            // The stretch between them is offered back, as a length of time.
+            compose.onNodeWithText("3h free").assertExists()
+        }
+    }
+
+    @Test
     fun theEndsOfARangeOpenTheirPickers() {
         val today = clock.today()
         runBlocking { tasks.create(NewTask("Over three days", startDate = today, dueDate = today.plusDays(2))) }
@@ -121,6 +139,8 @@ class TimelineInteractionTest {
             settle()
             compose.onAllNodes(hasText("Day") and hasClickAction())[0].performClick()
             settle()
+            compose.onNode(hasContentDescription("Hour grid")).performClick()
+            settle()
             compose.onNodeWithText("Solo").performTouchInput {
                 down(center)
                 advanceEventTime(800)
@@ -141,6 +161,8 @@ class TimelineInteractionTest {
         ActivityScenario.launch(MainActivity::class.java).use {
             settle()
             compose.onAllNodes(hasText("Day") and hasClickAction())[0].performClick()
+            settle()
+            compose.onNode(hasContentDescription("Hour grid")).performClick()
             settle()
             compose.onNode(hasContentDescription("Change end")).performTouchInput {
                 down(center)

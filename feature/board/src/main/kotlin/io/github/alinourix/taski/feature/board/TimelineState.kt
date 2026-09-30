@@ -29,11 +29,17 @@ internal class TimelineState(scale: TimelineScale, anchor: LocalDate) {
     var anchor by mutableStateOf(anchor)
     var unscheduledOpen by mutableStateOf(false)
 
+    /** A day as the precise hour grid (drag to move) rather than the agenda on a rail. */
+    var grid by mutableStateOf(false)
+
     companion object {
         val Saver = Saver<TimelineState, List<Any>>(
-            save = { listOf(it.scale.name, it.anchor.toEpochDay(), it.unscheduledOpen) },
+            save = { listOf(it.scale.name, it.anchor.toEpochDay(), it.unscheduledOpen, it.grid) },
             restore = { saved ->
-                TimelineState(TimelineScale.valueOf(saved[0] as String), LocalDate.ofEpochDay(saved[1] as Long)).also { it.unscheduledOpen = saved[2] as Boolean }
+                TimelineState(TimelineScale.valueOf(saved[0] as String), LocalDate.ofEpochDay(saved[1] as Long)).also {
+                    it.unscheduledOpen = saved[2] as Boolean
+                    it.grid = saved[3] as Boolean
+                }
             },
         )
     }
