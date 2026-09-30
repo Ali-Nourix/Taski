@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="editor_title_hint">نام تسک</string>
+    <string name="editor_progress">نوار پیشرفت</string>
+    <string name="editor_progress_total">مراحل</string>
+    <string name="editor_more">بیشتر</string>
+    <string name="editor_more_hint">تکرار، یادآور، پیشرفت…</string>
+    <string name="editor_timer">تایمر تمرکز</string>
+    <string name="editor_timer_minutes">%d دقیقه</string>
+    <string name="editor_start_focus">شروع تمرکز</string>
+    <string name="editor_remove">حذف</string>
+    <string name="editor_subtasks">زیرتسک‌ها</string>
+    <string name="editor_add_subtask">افزودن زیرتسک</string>
+    <string name="editor_blocked_by">منتظرِ</string>
+    <string name="editor_add_dependency">افزودن تسکی که این تسک منتظرش است</string>
+    <string name="editor_dependency_refused">این کار باعث می‌شود تسک‌ها منتظر یکدیگر بمانند</string>
+    <string name="editor_pick_dependency">منتظرِ…</string>
+    <string name="editor_search_tasks">جستجوی تسک‌ها</string>
+    <string name="editor_history">تاریخچه</string>
+    <string name="editor_completed_on">انجام شده در %s</string>
+    <string name="editor_focused_total">در مجموع %s تمرکز</string>
+    <string name="editor_created">ساخته شده در %s</string>
+    <string name="editor_delete">انتقال به سطل زباله</string>
+    <string name="editor_copy_markdown">کپی به‌صورت خط ابسیدین</string>
+    <string name="editor_copied">کپی شد</string>
+    <string name="editor_missing">این تسک دیگر وجود ندارد.</string>
+    <string name="editor_status">وضعیت</string>
+    <string name="editor_empty">خالی</string>
+    <string name="editor_notes_placeholder">یادداشت بنویسید…</string>
+    <string name="editor_steps_done">انجام‌شده</string>
+    <string name="editor_remove_progress">حذف نوار پیشرفت</string>
+    <string name="editor_remove_timer">حذف تایمر تمرکز</string>
+    <string name="editor_timer_length">مدت</string>
+
+    <string name="quick_add_hint">چه کاری باید انجام شود؟</string>
+    <string name="quick_add_syntax">نشانه‌های ابسیدین هم کار می‌کنند: @due(2026-12-31) @priority(high) @repeat(1w) @tag(work)</string>
+    <string name="quick_add_submit">افزودن تسک</string>
+    <string name="quick_add_added">تسک اضافه شد</string>
+
+    <string name="activity_created">ساخته شد</string>
+    <string name="activity_status_changed">وضعیت تغییر کرد</string>
+    <string name="activity_completed">انجام شد</string>
+    <string name="activity_rolled_forward">به تاریخ بعدی منتقل شد</string>
+    <string name="activity_deleted">به سطل زباله رفت</string>
+    <string name="activity_restored">بازگردانده شد</string>
+    <string name="activity_moved_to_inbox">به صندوق ورودی منتقل شد</string>
+    <string name="activity_cycle_edge_dropped">پیوندی که حلقه می‌ساخت حذف شد</string>
+</resources>

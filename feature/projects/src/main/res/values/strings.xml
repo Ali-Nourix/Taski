@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="projects_title">Projects</string>
+    <string name="projects_empty">No projects yet</string>
+    <string name="projects_empty_body">Projects are the phone’s notes: group tasks the way a note groups them in your vault.</string>
+    <string name="projects_new">New project</string>
+    <string name="projects_edit">Edit project</string>
+    <string name="projects_name">Name</string>
+    <string name="projects_delete">Delete project</string>
+    <string name="projects_delete_body">Its tasks move to the Inbox. Nothing else is deleted.</string>
+    <string name="projects_open_count">%1$d open · %2$d done</string>
+    <string name="projects_reorder">Drag to reorder</string>
+    <string name="project_add_task">Add a task</string>
+    <string name="project_empty">Nothing here yet</string>
+    <string name="project_show_done">Completed</string>
+</resources>

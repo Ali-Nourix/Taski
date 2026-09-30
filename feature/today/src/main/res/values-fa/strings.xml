@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_title">امروز</string>
+    <string name="today_overdue">عقب افتاده</string>
+    <string name="today_due">مهلت امروز</string>
+    <string name="today_in_progress">در حال انجام</string>
+    <string name="today_upcoming">پیش رو</string>
+    <string name="today_done">انجام شده امروز</string>
+    <string name="today_all_clear">امروز کاری نمانده</string>
+    <string name="today_all_clear_body">چیزی سررسید نشده. با دکمه پایین تسک اضافه کنید یا هفته را از بورد برنامه‌ریزی کنید.</string>
+    <string name="today_progress">%1$d از %2$d انجام شده</string>
+    <string name="today_stat_open">باز</string>
+    <string name="today_stat_overdue">عقب افتاده</string>
+    <string name="today_stat_focus">تمرکز</string>
+    <string name="today_up_next">بعدی</string>
+    <string name="today_focusing">در حال تمرکز</string>
+    <string name="today_done_all">امروز تمام شد</string>
+    <string name="today_underway">در جریان</string>
+</resources>

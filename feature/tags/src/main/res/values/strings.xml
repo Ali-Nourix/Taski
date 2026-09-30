@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tags_title">Tags</string>
+    <string name="tags_new">New tag</string>
+    <string name="tags_edit">Edit tag</string>
+    <string name="tags_name">Name</string>
+    <string name="tags_delete">Delete tag</string>
+    <string name="tags_delete_body">“%s” is removed from every task that has it. The tasks stay.</string>
+    <plurals name="tags_usage">
+        <item quantity="one">%d task</item>
+        <item quantity="other">%d tasks</item>
+    </plurals>
+    <string name="tags_empty">No tags yet</string>
+    <string name="tags_empty_body">Tags are your own labels — Work, Client, Deep work — each in its own colour.</string>
+    <string name="tags_reorder">Drag to reorder</string>
+    <string name="tags_hint">Renaming or recolouring a tag changes it on every task at once.</string>
+</resources>

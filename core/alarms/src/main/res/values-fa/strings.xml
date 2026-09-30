@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_reminders">یادآوری تسک</string>
+    <string name="channel_reminders_body">یادآوری خود تسک پیش از سررسید</string>
+    <string name="channel_digest">خلاصه روزانه</string>
+    <string name="channel_digest_quiet">خلاصه روزانه (ملایم)</string>
+    <string name="channel_digest_strict">خلاصه روزانه (سخت‌گیرانه)</string>
+    <string name="channel_timer">تایمر تمرکز</string>
+    <string name="channel_timer_done">پایان تایمر تمرکز</string>
+
+    <string name="reminder_title">یادآوری تسک</string>
+    <plurals name="digest_title">
+        <item quantity="one">%d تسک نیاز به رسیدگی دارد</item>
+        <item quantity="other">%d تسک نیاز به رسیدگی دارد</item>
+    </plurals>
+    <string name="digest_more">و %d مورد دیگر…</string>
+    <string name="due_overdue">عقب‌افتاده</string>
+    <string name="due_today">مهلت امروز</string>
+    <string name="due_tomorrow">مهلت فردا</string>
+    <string name="due_days_left">%d روز باقی‌مانده</string>
+    <string name="due_none">بدون سررسید</string>
+    <string name="action_done">انجام شد</string>
+    <string name="action_snooze">%d دقیقه بعد</string>
+    <string name="action_pause">توقف</string>
+    <string name="action_resume">ادامه</string>
+    <string name="action_stop">پایان</string>
+    <string name="action_add_five">+۵ دقیقه</string>
+    <string name="timer_running">در حال تمرکز</string>
+    <string name="timer_paused">متوقف · %s مانده</string>
+    <string name="timer_done_title">وقت تمام شد</string>
+    <string name="timer_done_body">%s</string>
+
+    <string name="alert_acknowledge">متوجه شدم</string>
+    <string name="alert_acknowledge_in">متوجه شدم (%d ثانیه)</string>
+    <string name="alert_dismiss">بستن</string>
+    <string name="alert_strict_hint">حالت سخت‌گیرانه: این هشدار باید تأیید شود.</string>
+    <string name="alert_open">باز کردن</string>
+</resources>
