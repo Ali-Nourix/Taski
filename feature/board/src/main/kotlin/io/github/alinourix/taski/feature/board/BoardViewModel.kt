@@ -17,6 +17,7 @@ import io.github.alinourix.taski.core.domain.model.ViewLayout
 import io.github.alinourix.taski.core.domain.query.Summary
 import io.github.alinourix.taski.core.domain.query.TaskGroup
 import io.github.alinourix.taski.core.domain.query.TaskQuery
+import io.github.alinourix.taski.core.domain.schedule.Schedule
 import io.github.alinourix.taski.core.domain.repository.PreferencesRepository
 import io.github.alinourix.taski.core.domain.repository.ProjectRepository
 import io.github.alinourix.taski.core.domain.repository.SavedViewRepository
@@ -159,6 +160,18 @@ class BoardViewModel @Inject constructor(
                 GroupBy.None -> Unit
             }
         }
+    }
+
+    /** Sets when a task happens. Both ends go in one edit, so the change is one row to sync. */
+    fun schedule(taskId: String, schedule: Schedule) {
+        actions.edit(taskId, TaskEdit.Start(schedule.startDate, schedule.startTime), TaskEdit.Due(schedule.dueDate, schedule.dueTime))
+    }
+
+    /** A new task placed on the timeline where it was asked for, with the view's pinned filters. */
+    fun addScheduled(title: String, schedule: Schedule) {
+        if (title.isBlank()) return
+        val base = TaskQuery.newTaskFor(title.trim(), state.value.view, null, clock.today())
+        actions.create(base.copy(startDate = schedule.startDate, startTime = schedule.startTime, dueDate = schedule.dueDate, dueTime = schedule.dueTime))
     }
 
     /** Adds a task inside [group] (or the view as a whole), inheriting what it pins down. */

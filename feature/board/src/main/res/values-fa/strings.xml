@@ -61,4 +61,35 @@
     <string name="col_tags">برچسب‌ها</string>
     <string name="col_progress">پیشرفت</string>
     <string name="col_project">پروژه</string>
+    <string name="board_layout_timeline">خط زمان</string>
+    <string name="timeline_day">روز</string>
+    <string name="timeline_week">هفته</string>
+    <string name="timeline_month">ماه</string>
+    <string name="timeline_today">امروز</string>
+    <string name="timeline_prev">قبلی</string>
+    <string name="timeline_next">بعدی</string>
+    <string name="timeline_all_day">تمام روز</string>
+    <string name="timeline_unscheduled">بدون زمان‌بندی</string>
+    <string name="timeline_schedule_on">زمان‌بندی برای %s</string>
+    <string name="timeline_new_task">تسک جدید</string>
+    <string name="timeline_new_hint">نام تسک</string>
+    <string name="timeline_empty_day">چیزی برنامه‌ریزی نشده. برای افزودن تسک روی جدول بزنید.</string>
+    <string name="timeline_handle_start">تغییر شروع</string>
+    <string name="timeline_handle_end">تغییر پایان</string>
+    <plurals name="timeline_free_days">
+        <item quantity="one">%d روز خالی</item>
+        <item quantity="other">%d روز خالی</item>
+    </plurals>
+    <plurals name="timeline_days">
+        <item quantity="one">%d روز</item>
+        <item quantity="other">%d روز</item>
+    </plurals>
+    <string name="timeline_earlier">زودتر</string>
+    <string name="timeline_later">دیرتر</string>
+    <string name="timeline_day_of">روز %1$d از %2$d</string>
+    <string name="timeline_nothing_today">امروز چیزی برنامه‌ریزی نشده</string>
+    <string name="timeline_due">سررسید</string>
+    <string name="timeline_to_today">رفتن به امروز</string>
+    <string name="timeline_add_here">افزودن تسک اینجا</string>
+    <string name="board_filters">فیلترها</string>
 </resources>

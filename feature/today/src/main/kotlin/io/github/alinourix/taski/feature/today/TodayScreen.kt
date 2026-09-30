@@ -110,6 +110,7 @@ fun TodayContent(
         val titles = mapOf(
             "overdue" to stringResource(R.string.today_overdue),
             "today" to stringResource(R.string.today_due),
+            "underway" to stringResource(R.string.today_underway),
             "progress" to stringResource(R.string.today_in_progress),
             "upcoming" to stringResource(R.string.today_upcoming),
         )
@@ -127,6 +128,7 @@ fun TodayContent(
             }
             section("overdue", titles.getValue("overdue"), state.overdue, state, actions, onOpenTask, onEdit)
             section("today", titles.getValue("today"), state.dueToday, state, actions, onOpenTask, onEdit)
+            section("underway", titles.getValue("underway"), state.underway, state, actions, onOpenTask, onEdit, showProject = true)
             section("progress", titles.getValue("progress"), state.inProgress, state, actions, onOpenTask, onEdit)
             section("upcoming", titles.getValue("upcoming"), state.upcoming, state, actions, onOpenTask, onEdit, showProject = true)
             if (state.doneToday.isNotEmpty()) {
@@ -168,7 +170,7 @@ private fun Hero(state: TodayState, actions: TaskActions, onOpenTask: (String) -
     val total = state.openCount + state.doneToday.size
     val timer = state.timer
     val running = state.timerTask?.takeIf { timer != null }
-    val next = running ?: state.inProgress.firstOrNull() ?: state.overdue.firstOrNull() ?: state.dueToday.firstOrNull()
+    val next = running ?: state.inProgress.firstOrNull() ?: state.overdue.firstOrNull() ?: state.dueToday.firstOrNull() ?: state.underway.firstOrNull()
     val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = { if (timer != null) onOpenTimer() else next?.let { onOpenTask(it.id) } },

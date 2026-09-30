@@ -6,7 +6,9 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.test.core.app.ActivityScenario
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -147,6 +149,30 @@ class AppScreenshotTest {
             settle()
             captureScreenRoboImage("${SHOTS}/task-sheet.png")
         }
+    }
+
+    @Test
+    fun timeline() {
+        seed()
+        runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.Timeline), lastTab = "board") } }
+        launch().use {
+            shoot("timeline-week")
+            compose.onNodeWithText("Draft the launch brief").performTouchInput { swipeUp() }
+            settle()
+            shoot("timeline-week-more")
+            tap("Day")
+            shoot("timeline-day")
+            tap("Month")
+            shoot("timeline-month")
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "fa-w412dp-h915dp-xxhdpi")
+    fun timelinePersian() {
+        seed(persian = true)
+        runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.Timeline), lastTab = "board") } }
+        launch().use { shoot("timeline-week-fa") }
     }
 
     @Test

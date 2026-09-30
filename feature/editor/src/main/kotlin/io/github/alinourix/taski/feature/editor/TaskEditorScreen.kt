@@ -96,6 +96,7 @@ import io.github.alinourix.taski.core.ui.component.MetaChip
 import io.github.alinourix.taski.core.ui.component.NewTaskRow
 import io.github.alinourix.taski.core.ui.component.PriorityChip
 import io.github.alinourix.taski.core.ui.component.PropertyLine
+import io.github.alinourix.taski.core.ui.component.StartChip
 import io.github.alinourix.taski.core.ui.component.StatusChip
 import io.github.alinourix.taski.core.ui.component.TagChip
 import io.github.alinourix.taski.core.ui.component.TaskRow
@@ -118,7 +119,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import io.github.alinourix.taski.core.ui.R as UiR
 
-private enum class Sheet { Status, Due, Repeat, Reminder, Priority, Project, Tags, Dependency, Progress, Timer }
+private enum class Sheet { Status, Start, Due, Repeat, Reminder, Priority, Project, Tags, Dependency, Progress, Timer }
 
 /**
  * A task as a page, the way Notion opens one: a breadcrumb to its parent, the
@@ -261,6 +262,9 @@ private fun EditorContent(
                 PropertyLine(Icons.Rounded.Timelapse, stringResource(R.string.editor_status), { sheet = Sheet.Status }) {
                     StatusChip(task.status)
                 }
+                PropertyLine(TaskIcons.Range, stringResource(UiR.string.pick_start), { sheet = Sheet.Start }) {
+                    if (task.startDate != null) StartChip(task) else EmptyValue()
+                }
                 PropertyLine(TaskIcons.Due, stringResource(UiR.string.pick_date), { sheet = Sheet.Due }) {
                     if (task.dueDate != null) DueChip(task) else EmptyValue()
                 }
@@ -378,6 +382,9 @@ private fun EditorContent(
     val close = { sheet = null }
     when (sheet) {
         Sheet.Status -> StatusSheet(task.status, onDismiss = close) { viewModel.setStatus(it); close() }
+        Sheet.Start -> DatePickerSheet(task.startDate, task.startTime, onDismiss = close, title = stringResource(UiR.string.pick_start)) { date, time ->
+            viewModel.edit(TaskEdit.Start(date, time)); close()
+        }
         Sheet.Due -> DatePickerSheet(task.dueDate, task.dueTime, onDismiss = close) { date, time ->
             viewModel.edit(TaskEdit.Due(date, time)); close()
         }

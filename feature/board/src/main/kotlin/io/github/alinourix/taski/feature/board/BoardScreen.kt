@@ -26,15 +26,21 @@ import androidx.compose.material.icons.rounded.BookmarkAdd
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FilterAltOff
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material.icons.rounded.SpaceDashboard
+import androidx.compose.material.icons.rounded.Inbox
 import androidx.compose.material.icons.rounded.TableChart
+import androidx.compose.material.icons.rounded.Today
+import androidx.compose.material.icons.rounded.Timeline
 import androidx.compose.material.icons.rounded.TableRows
 import androidx.compose.material.icons.rounded.ViewColumn
 import androidx.compose.material.icons.rounded.Workspaces
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.DropdownMenu
@@ -43,7 +49,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LeadingIconTab
+import androidx.compose.material3.Tab
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
@@ -118,6 +124,9 @@ fun BoardScreen(
     val query by viewModel.search.collectAsStateWithLifecycle()
     TaskEventsEffect(viewModel.actions, onFocusStarted = onOpenTimer)
     val sheet = rememberTaskSheetState()
+    val today = LocalUiConfig.current.today
+    val timeline = rememberTimelineState(today)
+    val unscheduled = remember(state.groups) { unscheduledOf(state).size }
     var filterSheet by rememberSaveable { mutableStateOf<FilterSheet?>(null) }
     var saving by rememberSaveable { mutableStateOf(false) }
     var searching by rememberSaveable { mutableStateOf(false) }
@@ -146,7 +155,8 @@ fun BoardScreen(
                 ViewTabs(state.view.layout, viewModel::setLayout)
                 AnimatedVisibility(showSearch) { SearchField(query) { viewModel.search.value = it } }
                 ViewsRow(state, onApply = viewModel::apply, onDelete = viewModel::deleteView)
-                FiltersRow(state.view, onOpen = { filterSheet = it }, onClear = viewModel::clearFilters)
+                // The timeline wants the room: its filters live in the floating toolbar instead.
+                if (state.view.layout != ViewLayout.Timeline) FiltersRow(state.view, onOpen = { filterSheet = it }, onClear = viewModel::clearFilters)
                 val onEdit = { id: String -> { property: TaskProperty -> sheet.open(id, property) } }
                 when {
                     state.loading -> LoadingState()
@@ -155,6 +165,7 @@ fun BoardScreen(
                         EmptyState(Icons.Rounded.FilterAltOff, stringResource(R.string.board_empty_filtered))
                     state.view.layout == ViewLayout.List -> BoardList(state, viewModel, onOpenTask, onEdit, contentPadding)
                     state.view.layout == ViewLayout.Table -> BoardTable(state, viewModel, onOpenTask, onEdit, contentPadding)
+                    state.view.layout == ViewLayout.Timeline -> BoardTimeline(state, timeline, viewModel, onOpenTask, onEdit, contentPadding)
                     else -> BoardColumns(state, viewModel, onOpenTask, onEdit, contentPadding)
                 }
             }
@@ -165,6 +176,11 @@ fun BoardScreen(
                 onToggleSubtasks = viewModel::toggleSubtasks,
                 onSave = { saving = true },
                 onAddTask = onAddTask,
+                onToday = { timeline.anchor = today },
+                unscheduled = unscheduled,
+                onUnscheduled = { timeline.unscheduledOpen = true },
+                onFilter = { filterSheet = it },
+                onClearFilters = viewModel::clearFilters,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = contentPadding.calculateBottomPadding() + 16.dp),
             )
         }
@@ -205,18 +221,14 @@ fun BoardScreen(
     if (saving) SaveViewDialog(onDismiss = { saving = false }) { viewModel.saveView(it); saving = false }
 }
 
-/** The three views of the same rows as quiet tabs: the selected one is underlined, nothing is filled. */
+/** The views of the same rows as quiet tabs: the selected one is underlined, nothing is filled. */
 @Composable
 private fun ViewTabs(layout: ViewLayout, onSelect: (ViewLayout) -> Unit) {
     val labels = mapOf(
         ViewLayout.List to stringResource(R.string.board_layout_list),
         ViewLayout.Table to stringResource(R.string.board_layout_table),
         ViewLayout.Board to stringResource(R.string.board_layout_board),
-    )
-    val icons = mapOf(
-        ViewLayout.List to Icons.AutoMirrored.Rounded.ViewList,
-        ViewLayout.Table to Icons.Rounded.TableChart,
-        ViewLayout.Board to Icons.Rounded.ViewColumn,
+        ViewLayout.Timeline to stringResource(R.string.board_layout_timeline),
     )
     SecondaryTabRow(
         selectedTabIndex = ViewLayout.entries.indexOf(layout),
@@ -224,11 +236,10 @@ private fun ViewTabs(layout: ViewLayout, onSelect: (ViewLayout) -> Unit) {
         divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) },
     ) {
         ViewLayout.entries.forEach { entry ->
-            LeadingIconTab(
+            Tab(
                 selected = entry == layout,
                 onClick = { onSelect(entry) },
-                text = { Text(labels.getValue(entry), maxLines = 1) },
-                icon = { Icon(icons.getValue(entry), null, Modifier.size(18.dp)) },
+                text = { Text(labels.getValue(entry), maxLines = 1, style = MaterialTheme.typography.titleSmall) },
             )
         }
     }
@@ -364,8 +375,14 @@ private fun Toolbar(
     onToggleSubtasks: () -> Unit,
     onSave: () -> Unit,
     onAddTask: () -> Unit,
+    onToday: () -> Unit,
+    unscheduled: Int,
+    onUnscheduled: () -> Unit,
+    onFilter: (FilterSheet) -> Unit,
+    onClearFilters: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var filterMenu by remember { mutableStateOf(false) }
     var groupMenu by remember { mutableStateOf(false) }
     var sortMenu by remember { mutableStateOf(false) }
     HorizontalFloatingToolbar(
@@ -378,35 +395,72 @@ private fun Toolbar(
         modifier = modifier,
         colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
     ) {
-        Box {
-            IconButton(onClick = { groupMenu = true }) { Icon(Icons.Rounded.TableRows, stringResource(R.string.board_group)) }
-            DropdownMenu(expanded = groupMenu, onDismissRequest = { groupMenu = false }) {
-                GroupBy.entries.forEach { g ->
+        if (view.layout == ViewLayout.Timeline) {
+            IconButton(onClick = onToday) { Icon(Icons.Rounded.Today, stringResource(R.string.timeline_to_today)) }
+            IconButton(onClick = onUnscheduled) {
+                BadgedBox(
+                    badge = {
+                        if (unscheduled > 0) Badge(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) {
+                            Text(unscheduled.toString().localizeDigits(LocalUiConfig.current.persian))
+                        }
+                    },
+                ) { Icon(Icons.Rounded.Inbox, stringResource(R.string.timeline_unscheduled)) }
+            }
+            Box {
+                IconButton(onClick = { filterMenu = true }) {
+                    BadgedBox(badge = { if (view.hasFilters) Badge(containerColor = MaterialTheme.colorScheme.primary) }) {
+                        Icon(Icons.Rounded.FilterList, stringResource(R.string.board_filters))
+                    }
+                }
+                DropdownMenu(expanded = filterMenu, onDismissRequest = { filterMenu = false }) {
+                    listOf(
+                        FilterSheet.Status to R.string.board_filter_status,
+                        FilterSheet.Priority to R.string.board_filter_priority,
+                        FilterSheet.Tags to R.string.board_filter_tags,
+                        FilterSheet.Project to R.string.board_filter_project,
+                    ).forEach { (sheet, label) ->
+                        DropdownMenuItem(text = { Text(stringResource(label)) }, onClick = { filterMenu = false; onFilter(sheet) })
+                    }
+                    if (view.hasFilters) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.board_clear_filters)) },
+                            leadingIcon = { Icon(Icons.Rounded.FilterAltOff, null) },
+                            onClick = { filterMenu = false; onClearFilters() },
+                        )
+                    }
+                }
+            }
+        } else {
+            Box {
+                IconButton(onClick = { groupMenu = true }) { Icon(Icons.Rounded.TableRows, stringResource(R.string.board_group)) }
+                DropdownMenu(expanded = groupMenu, onDismissRequest = { groupMenu = false }) {
+                        GroupBy.entries.forEach { g ->
+                        DropdownMenuItem(
+                            text = { Text(groupByLabel(g)) },
+                            trailingIcon = if (g == view.groupBy) ({ Icon(Icons.Rounded.Check, null) }) else null,
+                            onClick = { onGroup(g); groupMenu = false },
+                        )
+                    }
                     DropdownMenuItem(
-                        text = { Text(groupByLabel(g)) },
-                        trailingIcon = if (g == view.groupBy) ({ Icon(Icons.Rounded.Check, null) }) else null,
-                        onClick = { onGroup(g); groupMenu = false },
+                        text = { Text(stringResource(R.string.board_show_subtasks)) },
+                        trailingIcon = if (view.showSubtasks) ({ Icon(Icons.Rounded.Check, null) }) else null,
+                        onClick = { onToggleSubtasks(); groupMenu = false },
                     )
                 }
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.board_show_subtasks)) },
-                    trailingIcon = if (view.showSubtasks) ({ Icon(Icons.Rounded.Check, null) }) else null,
-                    onClick = { onToggleSubtasks(); groupMenu = false },
-                )
             }
-        }
-        Box {
-            IconButton(onClick = { sortMenu = true }) { Icon(SortIcon, stringResource(R.string.board_sort)) }
-            DropdownMenu(expanded = sortMenu, onDismissRequest = { sortMenu = false }) {
-                SortKey.entries.forEach { key ->
-                    DropdownMenuItem(
-                        text = { Text(sortLabel(key)) },
-                        trailingIcon = if (key == view.sortKey) ({
-                            Icon(if (view.descending) Icons.Rounded.ArrowDownward else Icons.Rounded.ArrowUpward,
-                                stringResource(if (view.descending) R.string.board_descending else R.string.board_ascending))
-                        }) else null,
-                        onClick = { onSort(key); sortMenu = false },
-                    )
+            Box {
+                IconButton(onClick = { sortMenu = true }) { Icon(SortIcon, stringResource(R.string.board_sort)) }
+                DropdownMenu(expanded = sortMenu, onDismissRequest = { sortMenu = false }) {
+                    SortKey.entries.forEach { key ->
+                        DropdownMenuItem(
+                            text = { Text(sortLabel(key)) },
+                            trailingIcon = if (key == view.sortKey) ({
+                                Icon(if (view.descending) Icons.Rounded.ArrowDownward else Icons.Rounded.ArrowUpward,
+                                    stringResource(if (view.descending) R.string.board_descending else R.string.board_ascending))
+                            }) else null,
+                            onClick = { onSort(key); sortMenu = false },
+                        )
+                    }
                 }
             }
         }

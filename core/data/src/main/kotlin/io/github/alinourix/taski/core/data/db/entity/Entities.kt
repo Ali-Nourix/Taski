@@ -26,6 +26,8 @@ data class TaskEntity(
     /** A [io.github.alinourix.taski.core.domain.model.TaskStatus] code. */
     val status: String,
     val priority: String?,
+    @ColumnInfo(name = "start_date") val startDate: String?,
+    @ColumnInfo(name = "start_time") val startTime: String?,
     @ColumnInfo(name = "due_date") val dueDate: String?,
     @ColumnInfo(name = "due_time") val dueTime: String?,
     /** Versioned JSON; see [io.github.alinourix.taski.core.domain.model.RepeatRule]. */

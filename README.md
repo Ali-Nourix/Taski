@@ -20,6 +20,11 @@ a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 <img src="docs/screenshots/projects.png" width="260" alt="Projects, each with its own shape">
 </p>
 <p>
+<img src="docs/screenshots/timeline-week.png" width="260" alt="Timeline, a week: only the days that matter">
+<img src="docs/screenshots/timeline-week-more.png" width="260" alt="A task over five days, with its ribbon and rail">
+<img src="docs/screenshots/timeline-day.png" width="260" alt="Timeline, a day as hours">
+</p>
+<p>
 <img src="docs/screenshots/today-dark.png" width="260" alt="Today in dark, with a running timer">
 <img src="docs/screenshots/project.png" width="260" alt="A project as a page">
 <img src="docs/screenshots/today-fa.png" width="260" alt="Today in Persian with Jalali dates">
@@ -44,6 +49,7 @@ a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 | Notes as task containers, the Inbox | Projects (with manual order) and the Inbox |
 | Reminders: daily times, repeat interval, quiet hours, filters by priority / status / deadline / age, gentle · normal · strict | The same schedule and filters as a daily digest; strict mode is a full-screen alert over the lock screen that must be held before it can be acknowledged; plus a per-task reminder before its due moment |
 | Overdue tasks move into `[!]` | Same, as a setting |
+| A deadline, and nothing else | **A start as well**, so a task is *from where to where*: a block in a day, a run of days, or both. Seen on a **Timeline** of the board (below); phone-only, so it is not written into Obsidian lines |
 | English / فارسی, RTL, Jalali | Per-app language, full RTL, Persian digits, Vazirmatn |
 | Markdown in the vault | **Import** any note in the plugin's syntax (subtasks, all markers, legacy emoji forms) and **export** everything back as one note; quick add reads the markers too |
 
@@ -62,6 +68,16 @@ things. Text is warm ink and grey; colour is scarce and means something:
 status, priority, tag and project colours are muted pastels, an overdue date is
 red, selection is a soft blue container, and the one saturated fill on a page is
 its action.
+
+The **Timeline** is where a task's *from → to* is seen. A **day** is an hour grid
+that opens only around what is there: blocks sit where they are, side by side when
+they overlap, and you press and drag one to move it or drag its edge to change
+when it ends. A **week** or a **month** is a plan of only the days that matter:
+each is a large date badge (today's a cookie) with big tonal cards, and the quiet
+stretches fold into "3 free days". A task over several days is a card with a ribbon
+— its first day and its last as two buttons that open their pickers, a wavy line
+for how far along it is — and a rail down the side tying its days together.
+Cards change shape when pressed, as Material 3 Expressive buttons do.
 
 Each screen has a single bold moment that does work. **Today** opens with
 *Up next*: the task to do now, the day's progress as a wavy line, and a button
@@ -93,7 +109,7 @@ dark, the way the plugin tints chips from the Obsidian theme.
 ```
 app                 Activity, navigation, adaptive shell, FAB menu, locale
 feature/today       Today: overdue, due, in progress, coming up, done
-feature/board       All tasks: table / list / kanban, filters, grouping, saved views
+feature/board       All tasks: table / list / kanban / timeline, filters, grouping, saved views
 feature/projects    Projects and a project's tasks in manual order
 feature/editor      Task page, quick add
 feature/timer       Focus timer
@@ -147,7 +163,7 @@ The zip holds the APK and [install notes in English and Persian](docs/INSTALL.md
 
 ## Tests
 
-- `core:domain` — HLC ordering and clock skew, UUIDv7, fractional indexing
+- `core:domain` — schedule spans, coherence, moving and resizing, lane packing and the week/month plan layout; HLC ordering and clock skew, UUIDv7, fractional indexing
   (reference cases and randomised), conflict merges, cycle breaking, orphans,
   recurrence (the plugin's cases), Jalali conversion, board queries, reminder
   selection and scheduling, the plugin's Markdown syntax.
@@ -156,7 +172,9 @@ The zip holds the APK and [install notes in English and Persian](docs/INSTALL.md
   restore, link revival, dependency loops refused, FTS search in Persian,
   claiming rows on sign-in, import/export round trip; plus the schema registry
   and Supabase parity checks.
-- `app` — the screenshot run above, which also drives navigation end to end.
+- `app` — the screenshot run above, which also drives navigation end to end, and
+  gesture tests that press-drag and resize timeline blocks and open a range's
+  pickers in the running app.
 
 ## License
 

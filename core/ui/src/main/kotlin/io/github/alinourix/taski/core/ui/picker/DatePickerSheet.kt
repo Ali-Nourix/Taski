@@ -100,6 +100,7 @@ fun DatePickerSheet(
     date: LocalDate?,
     time: LocalTime?,
     onDismiss: () -> Unit,
+    title: String = stringResource(R.string.pick_date),
     onConfirm: (LocalDate?, LocalTime?) -> Unit,
 ) {
     val config = LocalUiConfig.current
@@ -112,7 +113,7 @@ fun DatePickerSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.pick_date), style = MaterialTheme.typography.headlineSmallEmphasized)
+            Text(title, style = MaterialTheme.typography.headlineSmallEmphasized)
 
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 QuickDate(stringResource(R.string.due_today), today, selected) { selected = it; month = CalendarMonth.of(it, config.calendar) }

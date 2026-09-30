@@ -1,5 +1,6 @@
 package io.github.alinourix.taski.core.data.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import io.github.alinourix.taski.core.data.db.dao.HistoryDao
@@ -26,8 +27,10 @@ import io.github.alinourix.taski.core.data.db.entity.TimerSessionEntity
 import io.github.alinourix.taski.core.data.db.entity.TimerStateEntity
 
 @Database(
-    version = 1,
+    version = 2,
     exportSchema = true,
+    // v2: tasks gain an optional start (start_date, start_time), so a task can span start to due.
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
     entities = [
         TaskEntity::class,
         ProjectEntity::class,

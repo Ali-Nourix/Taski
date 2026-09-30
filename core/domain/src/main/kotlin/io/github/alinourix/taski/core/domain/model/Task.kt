@@ -1,5 +1,6 @@
 package io.github.alinourix.taski.core.domain.model
 
+import io.github.alinourix.taski.core.domain.schedule.Schedule
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -23,6 +24,9 @@ data class Task(
     val projectId: String? = null,
     /** The task this one is a subtask of. */
     val parentId: String? = null,
+    /** Where the task begins, so it spans start to due. Optional: a task with only a due date is a deadline. */
+    val startDate: LocalDate? = null,
+    val startTime: LocalTime? = null,
     val dueDate: LocalDate? = null,
     val dueTime: LocalTime? = null,
     val repeat: RepeatRule? = null,
@@ -39,6 +43,9 @@ data class Task(
 ) {
     val isDeleted: Boolean get() = deletedAt != null
     val isDone: Boolean get() = status == TaskStatus.Done
+
+    /** The start-to-due window as one value, for the pure schedule rules. */
+    val schedule: Schedule get() = Schedule(startDate, startTime, dueDate, dueTime)
 }
 
 /** One field-level change to a task. Each maps to exactly the columns it writes. */
@@ -47,6 +54,7 @@ sealed interface TaskEdit {
     data class Notes(val value: String) : TaskEdit
     data class SetPriority(val value: Priority?) : TaskEdit
     data class Due(val date: LocalDate?, val time: LocalTime?) : TaskEdit
+    data class Start(val date: LocalDate?, val time: LocalTime?) : TaskEdit
     data class Repeat(val value: RepeatRule?) : TaskEdit
     data class Progress(val value: StepProgress?) : TaskEdit
     data class Timer(val minutes: Int?) : TaskEdit
@@ -63,6 +71,8 @@ data class NewTask(
     val parentId: String? = null,
     val status: TaskStatus = TaskStatus.NotStarted,
     val priority: Priority? = null,
+    val startDate: LocalDate? = null,
+    val startTime: LocalTime? = null,
     val dueDate: LocalDate? = null,
     val dueTime: LocalTime? = null,
     val repeat: RepeatRule? = null,

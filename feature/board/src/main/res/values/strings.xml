@@ -61,4 +61,35 @@
     <string name="col_tags">Tags</string>
     <string name="col_progress">Progress</string>
     <string name="col_project">Project</string>
+    <string name="board_layout_timeline">Timeline</string>
+    <string name="timeline_day">Day</string>
+    <string name="timeline_week">Week</string>
+    <string name="timeline_month">Month</string>
+    <string name="timeline_today">Today</string>
+    <string name="timeline_prev">Previous</string>
+    <string name="timeline_next">Next</string>
+    <string name="timeline_all_day">All day</string>
+    <string name="timeline_unscheduled">Unscheduled</string>
+    <string name="timeline_schedule_on">Schedule on %s</string>
+    <string name="timeline_new_task">New task</string>
+    <string name="timeline_new_hint">Task name</string>
+    <string name="timeline_empty_day">Nothing planned. Tap the grid to add a task.</string>
+    <string name="timeline_handle_start">Change start</string>
+    <string name="timeline_handle_end">Change end</string>
+    <plurals name="timeline_free_days">
+        <item quantity="one">%d free day</item>
+        <item quantity="other">%d free days</item>
+    </plurals>
+    <plurals name="timeline_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="timeline_earlier">Earlier</string>
+    <string name="timeline_later">Later</string>
+    <string name="timeline_day_of">Day %1$d of %2$d</string>
+    <string name="timeline_nothing_today">Nothing planned today</string>
+    <string name="timeline_due">Due</string>
+    <string name="timeline_to_today">Jump to today</string>
+    <string name="timeline_add_here">Add a task here</string>
+    <string name="board_filters">Filters</string>
 </resources>

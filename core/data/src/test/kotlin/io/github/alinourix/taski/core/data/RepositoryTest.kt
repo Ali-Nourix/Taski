@@ -34,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Random
 import kotlin.test.assertEquals
@@ -116,6 +117,82 @@ class RepositoryTest {
         assertEquals(0, task.progress?.done)
         assertEquals(TaskStatus.NotStarted, tasks.observeItem(sub).first()!!.task.status, "subtasks reopen")
         assertEquals(listOf(LocalDate.of(2026, 9, 26)), tasks.observeCompletions(id).first().map { it.occurrenceDate })
+    }
+
+    @Test
+    fun aTaskCanSpanFromAStartToItsDue() = runTest {
+        val id = tasks.create(
+            NewTask("Write chapter", startDate = LocalDate.of(2026, 9, 28), startTime = LocalTime.of(9, 0), dueDate = LocalDate.of(2026, 9, 30), dueTime = LocalTime.of(17, 0)),
+        )
+
+        val task = tasks.observeItem(id).first()!!.task
+        assertEquals(LocalDate.of(2026, 9, 28), task.startDate)
+        assertEquals(LocalTime.of(9, 0), task.startTime)
+        assertEquals(LocalDate.of(2026, 9, 30), task.dueDate)
+        val fields = FieldRevs.decode(db.taskDao().get(id)!!.fieldRevs)
+        assertNotNull(fields["start_date"], "the start has its own field clocks")
+        assertNotNull(fields["start_time"])
+    }
+
+    @Test
+    fun aStartTimeNeedsItsDate() = runTest {
+        val id = tasks.create(NewTask("No date", startTime = LocalTime.of(9, 0), dueTime = LocalTime.of(10, 0)))
+
+        val task = tasks.observeItem(id).first()!!.task
+        assertNull(task.startTime)
+        assertNull(task.dueTime)
+    }
+
+    @Test
+    fun aStartMovedPastTheDueDragsTheDueAlongAndBothSync() = runTest {
+        val id = tasks.create(NewTask("Plan", startDate = LocalDate.of(2026, 9, 28), dueDate = LocalDate.of(2026, 9, 30)))
+        clock.advance(1_000)
+
+        tasks.edit(id, listOf(TaskEdit.Start(LocalDate.of(2026, 10, 2), null)))
+
+        val task = tasks.observeItem(id).first()!!.task
+        assertEquals(LocalDate.of(2026, 10, 2), task.startDate)
+        assertEquals(LocalDate.of(2026, 10, 2), task.dueDate)
+        val changed = OutboxDao.decodeFields(outbox().single { it.entity == "tasks" }.changedFields)
+        assertTrue("start_date" in changed && "due_date" in changed)
+    }
+
+    @Test
+    fun aDueMovedBeforeTheStartDragsTheStartAlong() = runTest {
+        val id = tasks.create(NewTask("Plan", startDate = LocalDate.of(2026, 9, 28), dueDate = LocalDate.of(2026, 9, 30)))
+
+        tasks.edit(id, listOf(TaskEdit.Due(LocalDate.of(2026, 9, 26), null)))
+
+        val task = tasks.observeItem(id).first()!!.task
+        assertEquals(LocalDate.of(2026, 9, 26), task.startDate)
+        assertEquals(LocalDate.of(2026, 9, 26), task.dueDate)
+    }
+
+    @Test
+    fun movingBothEndsAtOnceIsOneEdit() = runTest {
+        val id = tasks.create(NewTask("Plan", startDate = LocalDate.of(2026, 9, 28), dueDate = LocalDate.of(2026, 9, 29)))
+
+        tasks.edit(id, listOf(TaskEdit.Start(LocalDate.of(2026, 10, 5), null), TaskEdit.Due(LocalDate.of(2026, 10, 6), null)))
+
+        val task = tasks.observeItem(id).first()!!.task
+        assertEquals(LocalDate.of(2026, 10, 5), task.startDate)
+        assertEquals(LocalDate.of(2026, 10, 6), task.dueDate)
+    }
+
+    @Test
+    fun aRepeatingTaskKeepsItsLengthWhenItRollsForward() = runTest {
+        val id = tasks.create(
+            NewTask(
+                "Sprint", startDate = LocalDate.of(2026, 9, 23), dueDate = LocalDate.of(2026, 9, 26),
+                repeat = RepeatRule(1, RepeatUnit.Week),
+            ),
+        )
+
+        tasks.setStatus(id, TaskStatus.Done)
+
+        val task = tasks.observeItem(id).first()!!.task
+        assertEquals(LocalDate.of(2026, 10, 3), task.dueDate)
+        assertEquals(LocalDate.of(2026, 9, 30), task.startDate, "the start moves by the same number of days")
     }
 
     @Test

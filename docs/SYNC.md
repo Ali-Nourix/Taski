@@ -75,6 +75,14 @@ Restoring from the trash is an edit that clears `deleted_at` with a newer rev.
   **saved-view definitions** are versioned JSON (`{"v":1,…}`); a version the app
   does not understand is left untouched, because only an edit to that field
   rewrites it.
+- **A task's schedule is two independent ends**: `start_date`/`start_time` and
+  `due_date`/`due_time`, four nullable columns with their own field clocks, so
+  moving the start on one device and the due date on another merges cleanly.
+  The rule that keeps them consistent (a time needs its date, the start never
+  follows the due, and the end the person just set wins) is a pure function,
+  `TaskSchedule.coherent`, applied when an edit is written — it is not stored
+  and not synced. Room schema v2 added the start columns as an automatic
+  migration (`MigrationTest` upgrades a real v1 database file).
 - **Column names** are snake_case and identical in Room and Postgres
   (`SyncRegistryTest.columnNamesAreSnakeCase`, `SupabaseSchemaParityTest`).
 - **No foreign keys between synced tables**: rows can arrive in any order (a
@@ -144,7 +152,7 @@ they see each other's changes in (`ConflictRulesTest`).
   tombstones only), a trigger that sets `server_updated_at = now()` on insert
   and update, indexes on `(user_id, server_updated_at)`, and the tables added
   to the Realtime publication. `SupabaseSchemaParityTest` compares it with
-  Room's exported schema (`core/data/schemas/…/1.json`) table by table and
+  Room's exported schema (the latest `core/data/schemas/…/<version>.json`) table by table and
   column by column, including type compatibility, so they cannot drift.
 - Attachments, if added, get their own table with a local URI and a nullable
   remote path for Supabase Storage (sketched at the end of the migration).

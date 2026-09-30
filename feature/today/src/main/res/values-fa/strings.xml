@@ -15,4 +15,5 @@
     <string name="today_up_next">بعدی</string>
     <string name="today_focusing">در حال تمرکز</string>
     <string name="today_done_all">امروز تمام شد</string>
+    <string name="today_underway">در جریان</string>
 </resources>

@@ -63,7 +63,7 @@ import io.github.alinourix.taski.core.ui.theme.roles
 import kotlinx.coroutines.launch
 
 /** A property of a task that can be edited where it is shown. */
-enum class TaskProperty { Menu, Status, Due, Priority, Repeat, Reminder, Tags, Project }
+enum class TaskProperty { Menu, Status, Start, Due, Priority, Repeat, Reminder, Tags, Project }
 
 /** Which task's which property is being edited in place, if any. */
 @Stable
@@ -111,6 +111,9 @@ fun TaskSheetHost(
     val close = state::close
     when (property) {
         TaskProperty.Status -> StatusSheet(t.status, onDismiss = close) { actions.setStatus(task, it); close() }
+        TaskProperty.Start -> DatePickerSheet(t.startDate, t.startTime, onDismiss = close, title = stringResource(R.string.pick_start)) { date, time ->
+            actions.edit(id, TaskEdit.Start(date, time)); close()
+        }
         TaskProperty.Due -> DatePickerSheet(t.dueDate, t.dueTime, onDismiss = close) { date, time ->
             actions.edit(id, TaskEdit.Due(date, time)); close()
         }
@@ -159,6 +162,9 @@ private fun TaskMenuSheet(
             modifier = Modifier.padding(start = 8.dp, top = 6.dp, bottom = 12.dp),
         )
 
+        PropertyLine(TaskIcons.Range, stringResource(R.string.pick_start), { onEdit(TaskProperty.Start) }) {
+            if (task.startDate != null) StartChip(task) else Muted(stringResource(R.string.no_start))
+        }
         PropertyLine(TaskIcons.Due, stringResource(R.string.pick_date), { onEdit(TaskProperty.Due) }) {
             if (task.dueDate != null) DueChip(task) else Muted(stringResource(R.string.no_date))
         }

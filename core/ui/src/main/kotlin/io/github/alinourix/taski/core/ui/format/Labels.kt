@@ -7,6 +7,8 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.DonutLarge
 import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -33,6 +35,7 @@ import java.time.LocalDate
 
 object TaskIcons {
     val Due = Icons.Rounded.Event
+    val Range = Icons.Rounded.DateRange
     val Repeat = Icons.Rounded.Repeat
     val Timer = Icons.Rounded.Timer
     val Progress = Icons.Rounded.DonutLarge
@@ -133,6 +136,50 @@ fun dueText(task: Task, today: LocalDate = LocalUiConfig.current.today): DueText
         days < 0 -> Urgency.Overdue
         days == 0L -> Urgency.Today
         days <= 2 -> Urgency.Soon
+        else -> Urgency.Later
+    }
+    return DueText(label, urgency)
+}
+
+/**
+ * A task that has a start, as one chip: `09:00–10:30` on one day, `Sep 28 – Oct 2` over several.
+ * Its tone follows the end, like a deadline's. A task without a start gets the plain deadline text.
+ */
+@Composable
+fun scheduleText(task: Task, today: LocalDate = LocalUiConfig.current.today): DueText? {
+    val start = task.startDate ?: return dueText(task, today)
+    val config = LocalUiConfig.current
+    val end = task.dueDate ?: start
+    val todayWord = stringResource(R.string.due_today)
+    val tomorrowWord = stringResource(R.string.due_tomorrow)
+    val yesterdayWord = stringResource(R.string.due_yesterday)
+    fun day(date: LocalDate) = when (TaskQuery.daysUntil(date, today)) {
+        0L -> todayWord
+        1L -> tomorrowWord
+        -1L -> yesterdayWord
+        else -> CalendarText.date(date, config.calendar, config.persian, today)
+    }
+    fun time(value: java.time.LocalTime?) = value?.let { CalendarText.time(it, config.persian) }
+
+    val label = if (end == start) {
+        val from = time(task.startTime)
+        val to = time(task.dueTime)
+        val span = when {
+            from != null && to != null -> "$from–$to"
+            from != null -> from
+            else -> null
+        }
+        listOfNotNull(day(start), span).joinToString(" ")
+    } else {
+        val from = listOfNotNull(day(start), time(task.startTime)).joinToString(" ")
+        val to = listOfNotNull(day(end), time(task.dueTime)).joinToString(" ")
+        stringResource(R.string.range_arrow, from, to)
+    }
+    val urgency = when {
+        task.status == TaskStatus.Done -> Urgency.Met
+        end.isBefore(today) -> Urgency.Overdue
+        !start.isAfter(today) && !end.isBefore(today) -> Urgency.Today
+        TaskQuery.daysUntil(start, today) <= 2 -> Urgency.Soon
         else -> Urgency.Later
     }
     return DueText(label, urgency)

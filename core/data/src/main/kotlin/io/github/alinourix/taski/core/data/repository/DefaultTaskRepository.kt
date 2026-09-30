@@ -14,6 +14,9 @@ import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.domain.model.TaskStatus
 import io.github.alinourix.taski.core.domain.order.OrderPlanner
 import io.github.alinourix.taski.core.domain.recurrence.Recurrence
+import io.github.alinourix.taski.core.domain.schedule.Anchor
+import io.github.alinourix.taski.core.domain.schedule.Schedule
+import io.github.alinourix.taski.core.domain.schedule.TaskSchedule
 import io.github.alinourix.taski.core.domain.repository.TaskRepository
 import io.github.alinourix.taski.core.domain.sync.CycleRules
 import io.github.alinourix.taski.core.domain.sync.Edge
@@ -21,6 +24,7 @@ import io.github.alinourix.taski.core.domain.sync.FieldRevs
 import io.github.alinourix.taski.core.domain.sync.Hlc
 import io.github.alinourix.taski.core.domain.time.Clock
 import io.github.alinourix.taski.core.domain.time.DateCodes
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -110,6 +114,7 @@ class DefaultTaskRepository @Inject constructor(
 
         val rev = rev()
         val id = newId()
+        val schedule = TaskSchedule.coherent(Schedule(task.startDate, task.startTime, task.dueDate, task.dueTime), Anchor.Due)
         val entity = TaskEntity(
             id = id,
             projectId = projectId,
@@ -118,8 +123,10 @@ class DefaultTaskRepository @Inject constructor(
             notes = task.notes,
             status = task.status.code,
             priority = task.priority?.code,
-            dueDate = task.dueDate?.let(DateCodes::date),
-            dueTime = task.dueTime?.let(DateCodes::time),
+            startDate = schedule.startDate?.let(DateCodes::date),
+            startTime = schedule.startTime?.let(DateCodes::time),
+            dueDate = schedule.dueDate?.let(DateCodes::date),
+            dueTime = schedule.dueTime?.let(DateCodes::time),
             repeatRule = task.repeat?.encode(),
             progressDone = task.progress?.done,
             progressTotal = task.progress?.total,
@@ -153,6 +160,10 @@ class DefaultTaskRepository @Inject constructor(
                     dueDate = edit.date?.let(DateCodes::date),
                     dueTime = edit.date?.let { edit.time?.let(DateCodes::time) },
                 )
+                is TaskEdit.Start -> row.copy(
+                    startDate = edit.date?.let(DateCodes::date),
+                    startTime = edit.date?.let { edit.time?.let(DateCodes::time) },
+                )
                 is TaskEdit.Repeat -> row.copy(repeatRule = edit.value?.encode())
                 is TaskEdit.Progress -> row.copy(
                     progressDone = edit.value?.clampedDone,
@@ -173,7 +184,22 @@ class DefaultTaskRepository @Inject constructor(
                 is TaskEdit.SetParent -> reparent(row, edit.parentId)
             }
         }
+        if (edits.any { it is TaskEdit.Start || it is TaskEdit.Due }) row = row.coherentSchedule(if (edits.any { it is TaskEdit.Due }) Anchor.Due else Anchor.Start)
         saveTask(old, row)
+    }
+
+    /** Keeps start and due consistent: a time needs its date, and the start never follows the due. */
+    private fun TaskEntity.coherentSchedule(anchor: Anchor): TaskEntity {
+        val fixed = TaskSchedule.coherent(
+            Schedule(DateCodes.parseDate(startDate), DateCodes.parseTime(startTime), DateCodes.parseDate(dueDate), DateCodes.parseTime(dueTime)),
+            anchor,
+        )
+        return copy(
+            startDate = fixed.startDate?.let(DateCodes::date),
+            startTime = fixed.startTime?.let(DateCodes::time),
+            dueDate = fixed.dueDate?.let(DateCodes::date),
+            dueTime = fixed.dueTime?.let(DateCodes::time),
+        )
     }
 
     private suspend fun ChangeWriter.Change.reparent(row: TaskEntity, parentId: String?): TaskEntity {
@@ -208,10 +234,13 @@ class DefaultTaskRepository @Inject constructor(
         if (status == TaskStatus.Done && repeat != null) {
             val next = Recurrence.nextDueDate(repeat, task.dueDate, clock.today())
             recordCompletion(id, old.dueDate)
+            // The start moves by as many days as the due date, so the window keeps its length.
+            val movedBy = task.dueDate?.let { ChronoUnit.DAYS.between(it, next) } ?: 0L
             saveTask(
                 old,
                 old.copy(
                     status = TaskStatus.NotStarted.code,
+                    startDate = task.startDate?.plusDays(movedBy)?.let(DateCodes::date),
                     dueDate = DateCodes.date(next),
                     progressDone = old.progressTotal?.let { 0 },
                     completedAt = null,

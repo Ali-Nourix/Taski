@@ -27,6 +27,8 @@ data class TodayState(
     val loading: Boolean = true,
     val overdue: List<TaskItem> = emptyList(),
     val dueToday: List<TaskItem> = emptyList(),
+    /** Tasks whose start-to-due window includes today and that are due later: on the plan, not yet due. */
+    val underway: List<TaskItem> = emptyList(),
     val inProgress: List<TaskItem> = emptyList(),
     val upcoming: List<TaskItem> = emptyList(),
     val doneToday: List<TaskItem> = emptyList(),
@@ -35,9 +37,9 @@ data class TodayState(
     val tags: List<Tag> = emptyList(),
     val projects: List<Project> = emptyList(),
 ) {
-    fun find(id: String): TaskItem? = (overdue + dueToday + inProgress + upcoming + doneToday).firstOrNull { it.id == id }
+    fun find(id: String): TaskItem? = (overdue + dueToday + underway + inProgress + upcoming + doneToday).firstOrNull { it.id == id }
 
-    val openCount: Int get() = overdue.size + dueToday.size + inProgress.size
+    val openCount: Int get() = overdue.size + dueToday.size + underway.size + inProgress.size
     val isEmpty: Boolean get() = openCount == 0 && upcoming.isEmpty() && doneToday.isEmpty()
     val progress: Float get() = (openCount + doneToday.size).let { if (it == 0) 0f else doneToday.size.toFloat() / it }
 }
@@ -67,15 +69,23 @@ class TodayViewModel @Inject constructor(
         val open = items.filter { it.task.status != TaskStatus.Done }
         val overdue = open.filter { it.task.dueDate?.isBefore(today) == true }.sortedWith(compareBy<TaskItem> { it.task.dueDate }.then(order))
         val dueToday = open.filter { it.task.dueDate == today }.sortedWith(order)
-        val shown = (overdue + dueToday).map { it.id }.toSet()
+        val dueShown = (overdue + dueToday).map { it.id }.toSet()
+        val underway = open.filter { item ->
+            val start = item.task.startDate
+            val due = item.task.dueDate
+            item.id !in dueShown && start != null && !start.isAfter(today) && (due == null || due.isAfter(today))
+        }.sortedWith(compareBy<TaskItem> { it.task.startDate }.then(order))
+        val shown = dueShown + underway.map { it.id }
         TodayState(
             loading = false,
             overdue = overdue,
             dueToday = dueToday,
+            underway = underway,
             inProgress = open.filter { it.task.status == TaskStatus.InProgress && it.id !in shown }.sortedWith(order),
             upcoming = open.filter { item ->
                 val due = item.task.dueDate
-                due != null && due.isAfter(today) && !due.isAfter(today.plusDays(7)) && item.task.status != TaskStatus.InProgress
+                due != null && due.isAfter(today) && !due.isAfter(today.plusDays(7)) &&
+                    item.task.status != TaskStatus.InProgress && item.id !in shown
             }.sortedWith(compareBy<TaskItem> { it.task.dueDate }.then(order)),
             doneToday = items.filter { item ->
                 item.task.status == TaskStatus.Done &&

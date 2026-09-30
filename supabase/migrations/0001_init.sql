@@ -64,6 +64,8 @@ create table public.tasks (
   notes text not null default '',
   status text not null check (status in ('not_started', 'in_progress', 'done', 'not_done')),
   priority text check (priority in ('highest', 'high', 'medium', 'low', 'lowest')),
+  start_date text check (start_date ~ '^\d{4}-\d{2}-\d{2}$'),
+  start_time text check (start_time ~ '^\d{2}:\d{2}$'),
   due_date text check (due_date ~ '^\d{4}-\d{2}-\d{2}$'),
   due_time text check (due_time ~ '^\d{2}:\d{2}$'),
   repeat_rule jsonb,

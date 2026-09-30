@@ -120,8 +120,8 @@ fun TaskRow(
                 )
                 if (!config.compact) PropertyLine(item, extras, onEdit)
             }
-            if (config.compact && task.dueDate != null) {
-                DueChip(task, Modifier.padding(start = 8.dp), onClick = onEdit?.let { { it(TaskProperty.Due) } })
+            if (config.compact && (task.dueDate != null || task.startDate != null)) {
+                DueChip(task, Modifier.padding(start = 8.dp), onClick = onEdit?.let { { it(if (task.dueDate != null) TaskProperty.Due else TaskProperty.Start) } })
             }
         }
     }
@@ -148,11 +148,13 @@ private fun PropertyLine(item: TaskItem, extras: RowExtras, onEdit: ((TaskProper
     val persian = LocalUiConfig.current.persian
     fun edit(property: TaskProperty): (() -> Unit)? = onEdit?.let { { it(property) } }
     val timer = extras.timer?.takeIf { it.taskId == task.id }
-    val hasAny = task.dueDate != null || task.priority != null || task.repeat != null || item.progressFraction != null ||
+    val hasAny = task.dueDate != null || task.startDate != null || task.priority != null || task.repeat != null || item.progressFraction != null ||
         item.tags.isNotEmpty() || item.isBlocked || timer != null || (extras.showProject && item.project != null)
     if (!hasAny) return
     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp), itemVerticalAlignment = Alignment.CenterVertically) {
-        task.dueDate?.let { DueChip(task, onClick = edit(TaskProperty.Due)) }
+        if (task.dueDate != null || task.startDate != null) {
+            DueChip(task, onClick = edit(if (task.dueDate != null) TaskProperty.Due else TaskProperty.Start))
+        }
         task.priority?.let { PriorityChip(it, onClick = edit(TaskProperty.Priority), showLabel = false) }
         task.repeat?.let { RepeatChip(it, onClick = edit(TaskProperty.Repeat), showLabel = false) }
         timer?.let { LiveTimerChip(it) }

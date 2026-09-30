@@ -27,9 +27,10 @@ import io.github.alinourix.taski.core.domain.model.Task
 import io.github.alinourix.taski.core.domain.model.TaskStatus
 import io.github.alinourix.taski.core.ui.LocalUiConfig
 import io.github.alinourix.taski.core.ui.R
+import io.github.alinourix.taski.core.ui.format.CalendarText
 import io.github.alinourix.taski.core.ui.format.TaskIcons
 import io.github.alinourix.taski.core.ui.format.Urgency
-import io.github.alinourix.taski.core.ui.format.dueText
+import io.github.alinourix.taski.core.ui.format.scheduleText
 import io.github.alinourix.taski.core.ui.format.localizeDigits
 import io.github.alinourix.taski.core.ui.format.priorityLabel
 import io.github.alinourix.taski.core.ui.format.repeatLabel
@@ -104,9 +105,18 @@ fun dueColor(urgency: Urgency): Color = when (urgency) {
 
 @Composable
 fun DueChip(task: Task, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
-    val due = dueText(task) ?: return
+    val due = scheduleText(task) ?: return
     val color = dueColor(due.urgency)
-    PropertyToken(due.label, modifier, TaskIcons.Due, iconTint = color, textColor = color, onClick = onClick)
+    PropertyToken(due.label, modifier, if (task.startDate != null) TaskIcons.Range else TaskIcons.Due, iconTint = color, textColor = color, onClick = onClick)
+}
+
+/** Only the start of a task's window: `Today 09:00`, `Sep 28`. */
+@Composable
+fun StartChip(task: Task, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    val start = task.startDate ?: return
+    val config = LocalUiConfig.current
+    val time = task.startTime?.let { " " + CalendarText.time(it, config.persian) }.orEmpty()
+    PropertyToken(CalendarText.date(start, config.calendar, config.persian, config.today) + time, modifier, TaskIcons.Range, onClick = onClick)
 }
 
 @Composable

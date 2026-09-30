@@ -24,6 +24,8 @@ internal val TaskColumns = ColumnSet<TaskEntity>(
         "notes" to { it.notes },
         "status" to { it.status },
         "priority" to { it.priority },
+        "start_date" to { it.startDate },
+        "start_time" to { it.startTime },
         "due_date" to { it.dueDate },
         "due_time" to { it.dueTime },
         "repeat_rule" to { it.repeatRule },
