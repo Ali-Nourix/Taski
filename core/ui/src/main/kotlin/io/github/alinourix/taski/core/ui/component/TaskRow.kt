@@ -142,38 +142,50 @@ fun TaskRow(
     }
 }
 
+/** How many properties a row shows before folding the rest into "+N": a line to glance at, not a form. */
+private const val MaxTokens = 4
+
 @Composable
 private fun PropertyLine(item: TaskItem, extras: RowExtras, onEdit: ((TaskProperty) -> Unit)?) {
     val task = item.task
     val persian = LocalUiConfig.current.persian
     fun edit(property: TaskProperty): (() -> Unit)? = onEdit?.let { { it(property) } }
     val timer = extras.timer?.takeIf { it.taskId == task.id }
-    val hasAny = task.dueDate != null || task.startDate != null || task.priority != null || task.repeat != null || item.progressFraction != null ||
-        item.tags.isNotEmpty() || item.isBlocked || timer != null || (extras.showProject && item.project != null)
-    if (!hasAny) return
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp), itemVerticalAlignment = Alignment.CenterVertically) {
+
+    // In order of what matters at a glance; whatever does not fit is counted, not squeezed in.
+    val tokens = buildList<@Composable () -> Unit> {
         if (task.dueDate != null || task.startDate != null) {
-            DueChip(task, onClick = edit(if (task.dueDate != null) TaskProperty.Due else TaskProperty.Start))
+            add { DueChip(task, onClick = edit(if (task.dueDate != null) TaskProperty.Due else TaskProperty.Start)) }
         }
-        task.priority?.let { PriorityChip(it, onClick = edit(TaskProperty.Priority), showLabel = false) }
-        task.repeat?.let { RepeatChip(it, onClick = edit(TaskProperty.Repeat), showLabel = false) }
-        timer?.let { LiveTimerChip(it) }
+        item.tags.firstOrNull()?.let { tag -> add { TagChip(tag, onClick = edit(TaskProperty.Tags)) } }
+        task.priority?.let { add { PriorityChip(it, onClick = edit(TaskProperty.Priority), showLabel = false) } }
         if (item.subtaskCount > 0) {
-            PropertyToken(
-                stringResource(R.string.subtasks_count, item.subtasksDone, item.subtaskCount).localizeDigits(persian),
-                icon = Icons.AutoMirrored.Rounded.List,
-            )
-        } else {
-            item.progressFraction?.let { ProgressChip(it) }
-        }
-        if (item.isBlocked) BlockedChip()
-        if (extras.showProject) item.project?.let {
-            PropertyToken(it.name, icon = Icons.Rounded.Folder, onClick = edit(TaskProperty.Project))
-        }
-        if (item.tags.isNotEmpty()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                item.tags.forEach { TagChip(it, onClick = edit(TaskProperty.Tags)) }
+            add {
+                PropertyToken(
+                    stringResource(R.string.subtasks_count, item.subtasksDone, item.subtaskCount).localizeDigits(persian),
+                    icon = Icons.AutoMirrored.Rounded.List,
+                )
             }
+        } else {
+            item.progressFraction?.let { add { ProgressChip(it) } }
+        }
+        timer?.let { add { LiveTimerChip(it) } }
+        if (item.isBlocked) add { BlockedChip() }
+        if (extras.showProject) item.project?.let { project ->
+            add { PropertyToken(project.name, icon = Icons.Rounded.Folder, onClick = edit(TaskProperty.Project)) }
+        }
+        task.repeat?.let { add { RepeatChip(it, onClick = edit(TaskProperty.Repeat), showLabel = false) } }
+    }
+    val hiddenTags = (item.tags.size - 1).coerceAtLeast(0)
+    if (tokens.isEmpty() && hiddenTags == 0) return
+    // The "+N" token is one of the budget, so a row never grows past MaxTokens marks (and rarely past one line).
+    val shown = if (tokens.size + (if (hiddenTags > 0) 1 else 0) <= MaxTokens) tokens else tokens.take(MaxTokens - 1)
+    val more = (tokens.size - shown.size) + hiddenTags
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp), itemVerticalAlignment = Alignment.CenterVertically) {
+        shown.forEach { token -> token() }
+        if (more > 0) {
+            // The isolate keeps the plus sign on the left of its number in a right-to-left row.
+            PropertyToken("\u2066+" + more.toString().localizeDigits(persian) + "\u2069", onClick = onEdit?.let { { it(TaskProperty.Menu) } })
         }
     }
 }

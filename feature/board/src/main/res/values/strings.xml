@@ -104,4 +104,15 @@
     <string name="duration_join">%1$s %2$s</string>
     <string name="timeline_prev_week">Previous week</string>
     <string name="timeline_next_week">Next week</string>
+    <string name="board_view_options">View</string>
+    <string name="board_switch_view">Switch view</string>
+    <string name="board_section_filter">Filter</string>
+    <string name="board_section_group">Group by</string>
+    <string name="board_section_sort">Sort by</string>
+    <string name="board_filter_any">Any</string>
+    <string name="board_filter_count">%d selected</string>
+    <plurals name="timeline_unscheduled_count">
+        <item quantity="one">%d task without a date</item>
+        <item quantity="other">%d tasks without a date</item>
+    </plurals>
 </resources>

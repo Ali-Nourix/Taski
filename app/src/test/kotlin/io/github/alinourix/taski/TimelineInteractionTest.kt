@@ -71,6 +71,15 @@ class TimelineInteractionTest {
         compose.waitForIdle()
     }
 
+    /** Opens the header's scale menu (the chip shows the current scale) and chooses [target]. */
+    private fun scaleTo(current: String, target: String) {
+        compose.onAllNodes(hasText(current) and hasClickAction())[0].performClick()
+        settle()
+        val items = compose.onAllNodes(hasText(target) and hasClickAction())
+        items[items.fetchSemanticsNodes().size - 1].performClick()
+        settle()
+    }
+
     private fun task(id: String): Task = runBlocking { tasks.observeItem(id).first()!!.task }
 
     @Test
@@ -98,8 +107,7 @@ class TimelineInteractionTest {
         }
         ActivityScenario.launch(MainActivity::class.java).use {
             settle()
-            compose.onAllNodes(hasText("Day") and hasClickAction())[0].performClick()
-            settle()
+            scaleTo("Week", "Day")
             compose.onNodeWithText("Morning block").assertExists()
             compose.onNodeWithText("Afternoon block").assertExists()
             // The stretch between them is offered back, as a length of time.
@@ -137,10 +145,7 @@ class TimelineInteractionTest {
         val id = runBlocking { tasks.create(NewTask("Solo", startDate = today, startTime = LocalTime.of(9, 0), dueDate = today, dueTime = LocalTime.of(10, 0))) }
         ActivityScenario.launch(MainActivity::class.java).use {
             settle()
-            compose.onAllNodes(hasText("Day") and hasClickAction())[0].performClick()
-            settle()
-            compose.onNode(hasContentDescription("Hour grid")).performClick()
-            settle()
+            scaleTo("Week", "Day · Hour grid")
             compose.onNodeWithText("Solo").performTouchInput {
                 down(center)
                 advanceEventTime(800)
@@ -160,10 +165,7 @@ class TimelineInteractionTest {
         val id = runBlocking { tasks.create(NewTask("Solo", startDate = today, startTime = LocalTime.of(9, 0), dueDate = today, dueTime = LocalTime.of(10, 0))) }
         ActivityScenario.launch(MainActivity::class.java).use {
             settle()
-            compose.onAllNodes(hasText("Day") and hasClickAction())[0].performClick()
-            settle()
-            compose.onNode(hasContentDescription("Hour grid")).performClick()
-            settle()
+            scaleTo("Week", "Day · Hour grid")
             compose.onNode(hasContentDescription("Change end")).performTouchInput {
                 down(center)
                 // The drag starts counting once it passes the touch slop, so add the slop to move exactly an hour.

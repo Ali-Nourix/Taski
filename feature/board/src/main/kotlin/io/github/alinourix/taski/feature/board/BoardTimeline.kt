@@ -9,9 +9,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Today
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -31,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.alinourix.taski.core.designsystem.component.ConnectedToggleGroup
 import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.domain.schedule.Schedule
 import io.github.alinourix.taski.core.ui.LocalUiConfig
@@ -76,27 +81,20 @@ internal fun BoardTimeline(
         week.filter { day -> items.any { TaskSchedule.spanOf(it.task.schedule)?.coversDay(day) == true } }.toSet()
     }
     val createAt = { at: LocalDateTime -> draft = Schedule(at.toLocalDate(), at.toLocalTime(), at.plusHours(1).toLocalDate(), at.plusHours(1).toLocalTime()) }
+    val openUnscheduled = { timeline.unscheduledOpen = true }
 
     Column(Modifier.fillMaxSize()) {
-        ScaleToggle(scale, onScale = { timeline.scale = it })
-        if (scale == TimelineScale.Day) {
-            DayHeader(
-                anchor = anchor,
-                week = week,
-                busy = busy,
-                grid = timeline.grid,
-                onGrid = { timeline.grid = it },
-                onPick = { timeline.anchor = it },
-                onPreviousWeek = { timeline.anchor = anchor.minusDays(7) },
-                onNextWeek = { timeline.anchor = anchor.plusDays(7) },
-            )
-        } else {
-            RangeNav(
-                title = rangeTitle(scale, days),
-                onPrevious = { timeline.anchor = stepped(scale, anchor, -1, config.calendar) },
-                onNext = { timeline.anchor = stepped(scale, anchor, 1, config.calendar) },
-            )
-        }
+        TimelineHeader(
+            scale = scale,
+            grid = timeline.grid,
+            title = rangeTitle(scale, days),
+            showToday = if (scale == TimelineScale.Day) anchor != config.today else config.today !in days,
+            onScale = { newScale, grid -> timeline.scale = newScale; timeline.grid = grid },
+            onToday = { timeline.anchor = config.today },
+            onPrevious = { timeline.anchor = stepped(scale, anchor, -1, config.calendar) },
+            onNext = { timeline.anchor = stepped(scale, anchor, 1, config.calendar) },
+        )
+        if (scale == TimelineScale.Day) WeekStrip(anchor, week, busy, onPick = { timeline.anchor = it })
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when {
                 scale == TimelineScale.Day && !timeline.grid -> DayAgenda(
@@ -106,6 +104,8 @@ internal fun BoardTimeline(
                     onEdit = onEdit,
                     onToggle = viewModel.actions::toggle,
                     onCreateAt = createAt,
+                    unscheduled = unscheduled.size,
+                    onUnscheduled = openUnscheduled,
                     bottomPadding = bottom,
                 )
                 scale == TimelineScale.Day -> DayTimeline(
@@ -125,6 +125,8 @@ internal fun BoardTimeline(
                     onEdit = onEdit,
                     onToggle = viewModel.actions::toggle,
                     onCreateOn = { day -> draft = Schedule(day, null, day, null) },
+                    unscheduled = unscheduled.size,
+                    onUnscheduled = openUnscheduled,
                     bottomPadding = bottom,
                 )
             }
@@ -148,40 +150,63 @@ internal fun BoardTimeline(
     }
 }
 
+/**
+ * The timeline's whole header in one line: the scale as a chip that opens a small menu (day, day as an hour
+ * grid, week, month), what is being looked at, a way back to today when away from it, and the two arrows.
+ */
 @Composable
-private fun ScaleToggle(scale: TimelineScale, onScale: (TimelineScale) -> Unit) {
-    val labels = mapOf(
-        TimelineScale.Day to stringResource(R.string.timeline_day),
-        TimelineScale.Week to stringResource(R.string.timeline_week),
-        TimelineScale.Month to stringResource(R.string.timeline_month),
+private fun TimelineHeader(
+    scale: TimelineScale,
+    grid: Boolean,
+    title: String,
+    showToday: Boolean,
+    onScale: (TimelineScale, Boolean) -> Unit,
+    onToday: () -> Unit,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    val options = listOf(
+        Triple(TimelineScale.Day, false, stringResource(R.string.timeline_day)),
+        Triple(TimelineScale.Day, true, stringResource(R.string.timeline_day) + " · " + stringResource(R.string.timeline_view_grid)),
+        Triple(TimelineScale.Week, false, stringResource(R.string.timeline_week)),
+        Triple(TimelineScale.Month, false, stringResource(R.string.timeline_month)),
     )
-    ConnectedToggleGroup(
-        options = TimelineScale.entries,
-        selected = scale,
-        onSelect = onScale,
-        label = labels::getValue,
-        height = 40.dp,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp),
-    )
-}
-
-@Composable
-private fun RangeNav(title: String, onPrevious: () -> Unit, onNext: () -> Unit) {
-    Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onPrevious, shapes = IconButtonDefaults.shapes()) {
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, stringResource(R.string.timeline_prev))
+    val label = when (scale) {
+        TimelineScale.Day -> stringResource(R.string.timeline_day)
+        TimelineScale.Week -> stringResource(R.string.timeline_week)
+        TimelineScale.Month -> stringResource(R.string.timeline_month)
+    }
+    Row(Modifier.padding(start = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box {
+            AssistChip(
+                onClick = { open = true },
+                label = { Text(if (scale == TimelineScale.Day && grid) label + " · " + stringResource(R.string.timeline_view_grid) else label) },
+                trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null) },
+            )
+            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                options.forEach { (optionScale, optionGrid, text) ->
+                    val selected = optionScale == scale && (optionScale != TimelineScale.Day || optionGrid == grid)
+                    DropdownMenuItem(
+                        text = { Text(text) },
+                        trailingIcon = if (selected) ({ Icon(Icons.Rounded.Check, null) }) else null,
+                        onClick = { onScale(optionScale, optionGrid); open = false },
+                    )
+                }
+            }
         }
         Text(
             title,
-            style = MaterialTheme.typography.titleLargeEmphasized,
-            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
         )
-        IconButton(onClick = onNext, shapes = IconButtonDefaults.shapes()) {
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, stringResource(R.string.timeline_next))
+        if (showToday) {
+            IconButton(onClick = onToday) { Icon(Icons.Rounded.Today, stringResource(R.string.timeline_to_today)) }
         }
+        IconButton(onClick = onPrevious) { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, stringResource(R.string.timeline_prev)) }
+        IconButton(onClick = onNext) { Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, stringResource(R.string.timeline_next)) }
     }
 }
 

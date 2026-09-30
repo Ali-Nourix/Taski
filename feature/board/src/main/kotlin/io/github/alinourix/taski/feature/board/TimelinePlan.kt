@@ -19,12 +19,15 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Inbox
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.WavyProgressIndicatorDefaults
@@ -89,6 +92,8 @@ internal fun PlanTimeline(
     onEdit: (String) -> (TaskProperty) -> Unit,
     onToggle: (TaskItem) -> Unit,
     onCreateOn: (LocalDate) -> Unit,
+    unscheduled: Int,
+    onUnscheduled: () -> Unit,
     bottomPadding: Dp,
 ) {
     val config = LocalUiConfig.current
@@ -116,6 +121,7 @@ internal fun PlanTimeline(
                 is PlanRow.Quiet -> QuietSection(row, railColors, gutter, onCreateOn)
             }
         }
+        item(key = "unscheduled") { UnscheduledFooter(unscheduled, onUnscheduled) }
     }
 }
 
@@ -305,7 +311,7 @@ private fun Ribbon(span: Span, today: LocalDate, accent: Color, onContainer: Col
 
 @Composable
 private fun EndCap(text: String, onContainer: Color, onClick: () -> Unit, modifier: Modifier) {
-    Surface(onClick = onClick, shape = RoundedCornerShape(50), color = onContainer.copy(alpha = 0.10f), contentColor = onContainer, modifier = modifier) {
+    Surface(onClick = onClick, shape = RoundedCornerShape(50), color = onContainer.copy(alpha = 0.10f), contentColor = onContainer, modifier = modifier.minimumInteractiveComponentSize()) {
         Text(text, style = MaterialTheme.typography.titleSmall, maxLines = 1, modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp))
     }
 }
@@ -353,6 +359,25 @@ private fun ContinuePill(slot: PlanSlot, item: TaskItem, onOpenTask: (String) ->
             Box(Modifier.size(10.dp).clip(CircleShape).background(roles.accent))
             Text(item.task.title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             Text(progress, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.End)
+        }
+    }
+}
+
+/** The tasks with no date, offered where the plan ends rather than in a control that is always on screen. */
+@Composable
+internal fun UnscheduledFooter(count: Int, onClick: () -> Unit) {
+    if (count == 0) return
+    val persian = LocalUiConfig.current.persian
+    MorphCard(onClick = onClick, color = MaterialTheme.colorScheme.surfaceContainerLow, restRadius = 24.dp, modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+        Row(Modifier.padding(horizontal = 20.dp, vertical = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Icon(Icons.Rounded.Inbox, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                pluralStringResource(R.plurals.timeline_unscheduled_count, count, count).localizeDigits(persian),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

@@ -84,7 +84,7 @@ internal fun rangeTitle(scale: TimelineScale, days: List<LocalDate>): String {
     val config = LocalUiConfig.current
     val first = days.first()
     return when (scale) {
-        TimelineScale.Day -> CalendarText.weekdayLong(first.dayOfWeek, config.persian) +
+        TimelineScale.Day -> CalendarText.weekdayLong(first.dayOfWeek, config.persian).let { if (config.persian) it else it.take(3) } +
             (if (config.persian) "، " else ", ") + CalendarText.date(first, config.calendar, config.persian, config.today)
         TimelineScale.Week -> CalendarText.date(first, config.calendar, config.persian, config.today) + " – " +
             CalendarText.date(days.last(), config.calendar, config.persian, config.today)

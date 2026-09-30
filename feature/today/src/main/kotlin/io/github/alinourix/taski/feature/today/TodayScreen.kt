@@ -13,11 +13,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -95,6 +97,8 @@ fun TodayContent(
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.today_title)) },
                 subtitle = { Text(todaySubtitle()) },
+                // Shorter than the default: the day's first card should start in the top fifth.
+                expandedHeight = 112.dp,
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -118,6 +122,9 @@ fun TodayContent(
         val emptyBody = stringResource(R.string.today_all_clear_body)
         val doneTitle = stringResource(R.string.today_done)
         val onEdit = { item: TaskItem -> { property: TaskProperty -> sheet.open(item.id, property) } }
+        // The card at the top is the next task; the list below does not say it a second time.
+        val hero = heroTask(state)?.id
+        fun List<TaskItem>.rest() = filterNot { it.id == hero }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding() + 96.dp),
@@ -126,11 +133,11 @@ fun TodayContent(
             if (state.isEmpty) {
                 item(key = "empty") { EmptyState(Icons.Rounded.WbSunny, emptyTitle, body = emptyBody) }
             }
-            section("overdue", titles.getValue("overdue"), state.overdue, state, actions, onOpenTask, onEdit)
-            section("today", titles.getValue("today"), state.dueToday, state, actions, onOpenTask, onEdit)
-            section("underway", titles.getValue("underway"), state.underway, state, actions, onOpenTask, onEdit, showProject = true)
-            section("progress", titles.getValue("progress"), state.inProgress, state, actions, onOpenTask, onEdit)
-            section("upcoming", titles.getValue("upcoming"), state.upcoming, state, actions, onOpenTask, onEdit, showProject = true)
+            section("overdue", titles.getValue("overdue"), state.overdue.rest(), state, actions, onOpenTask, onEdit)
+            section("today", titles.getValue("today"), state.dueToday.rest(), state, actions, onOpenTask, onEdit)
+            section("underway", titles.getValue("underway"), state.underway.rest(), state, actions, onOpenTask, onEdit, showProject = true)
+            section("progress", titles.getValue("progress"), state.inProgress.rest(), state, actions, onOpenTask, onEdit)
+            section("upcoming", titles.getValue("upcoming"), state.upcoming.rest(), state, actions, onOpenTask, onEdit, showProject = true)
             if (state.doneToday.isNotEmpty()) {
                 item(key = "done-header") {
                     SectionHeader(doneTitle, count = state.doneToday.size, trailing = {
@@ -158,6 +165,13 @@ private fun todaySubtitle(): String {
     return "$day${if (config.persian) "،" else ","} $main$second"
 }
 
+/** The task the card at the top is about: the one being timed, else the most pressing. */
+private fun heroTask(state: TodayState): TaskItem? {
+    if (state.isEmpty) return null
+    val running = state.timerTask?.takeIf { state.timer != null }
+    return running ?: state.inProgress.firstOrNull() ?: state.overdue.firstOrNull() ?: state.dueToday.firstOrNull() ?: state.underway.firstOrNull()
+}
+
 /**
  * The screen's one bold moment, and it does work: the task to do next with a
  * button to start focusing on it — or, while a timer runs, the countdown. Its
@@ -169,8 +183,7 @@ private fun Hero(state: TodayState, actions: TaskActions, onOpenTask: (String) -
     val persian = LocalUiConfig.current.persian
     val total = state.openCount + state.doneToday.size
     val timer = state.timer
-    val running = state.timerTask?.takeIf { timer != null }
-    val next = running ?: state.inProgress.firstOrNull() ?: state.overdue.firstOrNull() ?: state.dueToday.firstOrNull() ?: state.underway.firstOrNull()
+    val next = heroTask(state)
     val scheme = MaterialTheme.colorScheme
     Surface(
         onClick = { if (timer != null) onOpenTimer() else next?.let { onOpenTask(it.id) } },
@@ -200,7 +213,7 @@ private fun Hero(state: TodayState, actions: TaskActions, onOpenTask: (String) -
             } else {
                 Text(stringResource(R.string.today_all_clear), style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     LinearWavyProgressIndicator(
                         progress = { state.progress },
@@ -215,6 +228,11 @@ private fun Hero(state: TodayState, actions: TaskActions, onOpenTask: (String) -
                             style = MaterialTheme.typography.labelMedium,
                             color = scheme.onPrimaryContainer.copy(alpha = 0.72f),
                         )
+                    }
+                }
+                if (next != null) {
+                    FilledTonalIconButton(onClick = { actions.toggle(next) }, shapes = IconButtonDefaults.shapes(), modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Rounded.Check, stringResource(UiR.string.action_done))
                     }
                 }
                 if (timer == null && next != null && actions.canFocus) {

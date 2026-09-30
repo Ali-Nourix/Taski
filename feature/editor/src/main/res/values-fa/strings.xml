@@ -3,6 +3,8 @@
     <string name="editor_title_hint">نام تسک</string>
     <string name="editor_progress">نوار پیشرفت</string>
     <string name="editor_progress_total">مراحل</string>
+    <string name="editor_more">بیشتر</string>
+    <string name="editor_more_hint">تکرار، یادآور، پیشرفت…</string>
     <string name="editor_timer">تایمر تمرکز</string>
     <string name="editor_timer_minutes">%d دقیقه</string>
     <string name="editor_start_focus">شروع تمرکز</string>

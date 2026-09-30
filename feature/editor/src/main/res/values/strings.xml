@@ -3,6 +3,8 @@
     <string name="editor_title_hint">Task name</string>
     <string name="editor_progress">Progress bar</string>
     <string name="editor_progress_total">Steps</string>
+    <string name="editor_more">More</string>
+    <string name="editor_more_hint">Repeat, reminder, progress…</string>
     <string name="editor_timer">Focus timer</string>
     <string name="editor_timer_minutes">%d minutes</string>
     <string name="editor_start_focus">Start focus</string>

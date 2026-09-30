@@ -20,16 +20,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bedtime
-import androidx.compose.material.icons.rounded.CalendarViewDay
 import androidx.compose.material.icons.rounded.LightMode
-import androidx.compose.material.icons.rounded.Timeline
 import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -162,6 +157,8 @@ internal fun DayAgenda(
     onEdit: (String) -> (TaskProperty) -> Unit,
     onToggle: (TaskItem) -> Unit,
     onCreateAt: (LocalDateTime) -> Unit,
+    unscheduled: Int,
+    onUnscheduled: () -> Unit,
     bottomPadding: Dp,
 ) {
     val config = LocalUiConfig.current
@@ -194,6 +191,7 @@ internal fun DayAgenda(
                 is AgendaRow.Now -> NowRow(row.minute)
             }
         }
+        item(key = "unscheduled") { UnscheduledFooter(unscheduled, onUnscheduled) }
     }
 }
 
@@ -252,10 +250,10 @@ private fun AgendaItem(entry: Entry, onOpenTask: (String) -> Unit, onEdit: (Stri
         Column(Modifier.width(TimeColumn).padding(start = 16.dp, top = 12.dp)) {
             if (deadline) {
                 Text(stringResource(R.string.timeline_due), style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant)
-                Text(CalendarText.time(entry.span.end.toLocalTime(), config.persian), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = scheme.onSurface, modifier = Modifier.clickable { edit(TaskProperty.Due) })
+                Text(CalendarText.time(entry.span.end.toLocalTime(), config.persian), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = scheme.onSurface)
             } else {
-                Text(start, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = scheme.onSurface, modifier = Modifier.clickable { edit(TaskProperty.Start) })
-                Text(end, style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, modifier = Modifier.clickable { edit(TaskProperty.Due) })
+                Text(start, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = scheme.onSurface)
+                Text(end, style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant)
             }
         }
         Box(Modifier.width(RailColumn).padding(top = 10.dp), contentAlignment = Alignment.TopCenter) {
@@ -332,43 +330,13 @@ private fun NowRow(minute: Int) {
     }
 }
 
-/** The day's own header, Tiimo's way: the weekday large, then the week as a strip to jump along. */
+/** The week as a strip to jump along: one tap to any day, a dot under the days that have something. */
 @Composable
-internal fun DayHeader(
-    anchor: LocalDate,
-    week: List<LocalDate>,
-    busy: Set<LocalDate>,
-    grid: Boolean,
-    onGrid: (Boolean) -> Unit,
-    onPick: (LocalDate) -> Unit,
-    onPreviousWeek: () -> Unit,
-    onNextWeek: () -> Unit,
-) {
+internal fun WeekStrip(anchor: LocalDate, week: List<LocalDate>, busy: Set<LocalDate>, onPick: (LocalDate) -> Unit) {
     val config = LocalUiConfig.current
-    val scheme = MaterialTheme.colorScheme
-    Column(Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 4.dp)) {
-        Row(Modifier.padding(start = 20.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(CalendarText.weekdayLong(anchor.dayOfWeek, config.persian), style = MaterialTheme.typography.headlineMediumEmphasized, maxLines = 1)
-                Text(
-                    CalendarText.date(anchor, config.calendar, config.persian, null),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = scheme.onSurfaceVariant,
-                    maxLines = 1,
-                )
-            }
-            ViewToggle(grid, onGrid)
-        }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onPreviousWeek, modifier = Modifier.size(32.dp)) {
-                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, stringResource(R.string.timeline_prev_week), modifier = Modifier.size(20.dp))
-            }
-            week.forEach { day ->
-                StripDay(day, selected = day == anchor, today = day == config.today, busy = day in busy, onClick = { onPick(day) }, modifier = Modifier.weight(1f))
-            }
-            IconButton(onClick = onNextWeek, modifier = Modifier.size(32.dp)) {
-                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, stringResource(R.string.timeline_next_week), modifier = Modifier.size(20.dp))
-            }
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+        week.forEach { day ->
+            StripDay(day, selected = day == anchor, today = day == config.today, busy = day in busy, onClick = { onPick(day) }, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -403,34 +371,5 @@ private fun StripDay(day: LocalDate, selected: Boolean, today: Boolean, busy: Bo
             )
         }
         Box(Modifier.size(5.dp).clip(CircleShape).background(if (busy) scheme.primary.copy(alpha = 0.6f) else Color.Transparent))
-    }
-}
-
-/** Agenda or hour grid: two icons, the chosen one filled. */
-@Composable
-private fun ViewToggle(grid: Boolean, onGrid: (Boolean) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val agenda = stringResource(R.string.timeline_view_agenda)
-    val hours = stringResource(R.string.timeline_view_grid)
-    Row(Modifier.clip(RoundedCornerShape(50)).background(scheme.surfaceContainerHigh).padding(3.dp)) {
-        listOf(false to agenda, true to hours).forEach { (isGrid, label) ->
-            val selected = isGrid == grid
-            Box(
-                Modifier
-                    .size(width = 46.dp, height = 36.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(if (selected) scheme.primaryContainer else Color.Transparent)
-                    .clickable(onClickLabel = label) { onGrid(isGrid) }
-                    .semantics { contentDescription = label },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    if (isGrid) Icons.Rounded.CalendarViewDay else Icons.Rounded.Timeline,
-                    null,
-                    tint = if (selected) scheme.onPrimaryContainer else scheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        }
     }
 }

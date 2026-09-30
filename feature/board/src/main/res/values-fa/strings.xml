@@ -104,4 +104,15 @@
     <string name="duration_join">%1$s و %2$s</string>
     <string name="timeline_prev_week">هفتهٔ قبل</string>
     <string name="timeline_next_week">هفتهٔ بعد</string>
+    <string name="board_view_options">نما</string>
+    <string name="board_switch_view">تغییر نما</string>
+    <string name="board_section_filter">فیلتر</string>
+    <string name="board_section_group">گروه‌بندی</string>
+    <string name="board_section_sort">مرتب‌سازی</string>
+    <string name="board_filter_any">همه</string>
+    <string name="board_filter_count">%d مورد انتخاب شده</string>
+    <plurals name="timeline_unscheduled_count">
+        <item quantity="one">%d تسک بدون تاریخ</item>
+        <item quantity="other">%d تسک بدون تاریخ</item>
+    </plurals>
 </resources>

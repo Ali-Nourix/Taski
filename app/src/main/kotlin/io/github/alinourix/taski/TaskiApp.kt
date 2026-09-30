@@ -185,8 +185,8 @@ fun TaskiApp(
                     }
                 },
                 floatingActionButton = {
-                    // The board docks its own add button into its floating toolbar.
-                    AnimatedVisibility(visible = currentTab == Tab.Today || currentTab == Tab.Projects, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
+                    // One add button for every list; nothing else floats over the content.
+                    AnimatedVisibility(visible = currentTab == Tab.Today || currentTab == Tab.Projects || currentTab == Tab.Board, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
                         CreateMenu(
                             expanded = fabOpen,
                             onExpandedChange = { fabOpen = it },
@@ -205,7 +205,6 @@ fun TaskiApp(
                             BoardScreen(
                                 onOpenTask = navController::navigateToTask,
                                 onManageTags = navController::navigateToTags,
-                                onAddTask = { quickAdd = "" },
                                 onOpenTimer = navController::navigateToTimer,
                                 contentPadding = padding,
                             )

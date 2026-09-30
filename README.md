@@ -25,6 +25,11 @@ a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 <img src="docs/screenshots/timeline-week-more.png" width="260" alt="A task over five days, with its ribbon and rail">
 </p>
 <p>
+<img src="docs/screenshots/view-menu.png" width="260" alt="The screen's title is its view switcher">
+<img src="docs/screenshots/view-sheet.png" width="260" alt="Filter, group and sort live in one View sheet">
+<img src="docs/screenshots/fab-menu.png" width="260" alt="One button to add: task, or focus timer">
+</p>
+<p>
 <img src="docs/screenshots/today-dark.png" width="260" alt="Today in dark, with a running timer">
 <img src="docs/screenshots/project.png" width="260" alt="A project as a page">
 <img src="docs/screenshots/today-fa.png" width="260" alt="Today in Persian with Jalali dates">
@@ -69,6 +74,30 @@ status, priority, tag and project colours are muted pastels, an overdue date is
 red, selection is a soft blue container, and the one saturated fill on a page is
 its action.
 
+### Calm, on a budget
+
+An app you open twenty times a day has to feel light, so density is treated as a
+number and not a mood. Each screen shows its content near the top behind at most
+six controls, keeps **one** navigation layer (the bottom bar) and **one** floating
+button, and puts everything else one tap away:
+
+- the screen's **title is its view switcher** — tap *List ▾* to choose List, Table,
+  Board or Timeline, or a saved view; there are no tab strips or filter rows above
+  the content;
+- **filter, group, sort and show-subtasks live in one View sheet** behind one icon,
+  with a badge when a filter is on;
+- a task row is its title plus **one line of at most four marks**, the rest folded
+  into "+N"; priority and repeat are glyphs, and every mark still edits in place;
+- **Today** says its next task once — in the *Up next* card, with done and focus
+  buttons — and not again in the list under it;
+- a task page shows the properties in use; repeat, reminder, progress and timer
+  wait behind **More** until asked for.
+
+These limits are written down in [`.claude/skills/taski-design`](.claude/skills/taski-design/SKILL.md)
+with their numbers, and the ones that can be measured are tests
+(`DensityBudgetTest`): where the first task starts as a share of the screen, and how
+many controls sit above it.
+
 The **Timeline** is where a task's *from → to* is seen, and it was shaped by
 studying what works: Tiimo's big weekday and week strip, Structured's rail of
 pills, Google Calendar's Expressive containers. A **day** is an agenda on a rail —
@@ -97,9 +126,9 @@ setting.
 
 `MaterialExpressiveTheme` with the expressive motion scheme; flexible large and
 medium top app bars; `ShortNavigationBar` on phones and `WideNavigationRail` on
-wide screens; the `FloatingActionButtonMenu` with a toggle FAB; a
-`HorizontalFloatingToolbar` on the board; connected `ToggleButton` groups instead
-of segmented buttons; `LoadingIndicator`; wavy linear and circular progress;
+wide screens; the `FloatingActionButtonMenu` with a toggle FAB as the one
+way to add; connected `ToggleButton` groups instead of segmented buttons in
+sheets; `LoadingIndicator`; wavy linear and circular progress;
 `MaterialShapes` everywhere a shape carries meaning — the checkbox morphs from a
 circle into a cookie when a task is done, the play button morphs as the timer
 runs, a selected date or colour becomes a cookie. Segmented lists with large
@@ -177,9 +206,11 @@ The zip holds the APK and [install notes in English and Persian](docs/INSTALL.md
   restore, link revival, dependency loops refused, FTS search in Persian,
   claiming rows on sign-in, import/export round trip; plus the schema registry
   and Supabase parity checks.
-- `app` — the screenshot run above, which also drives navigation end to end, and
+- `app` — the screenshot run above, which also drives navigation end to end;
   gesture tests that press-drag and resize timeline blocks and open a range's
-  pickers in the running app.
+  pickers in the running app; and the density budget: the first task starts in the
+  top quarter of the list, the week plan's first card in the top third, Today names
+  its next task once, and the task page folds its empty rare properties.
 
 ## License
 

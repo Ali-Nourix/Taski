@@ -66,7 +66,8 @@ class AppScreenshotTest {
 
     private fun seed(persian: Boolean = false, theme: ThemeMode = ThemeMode.Light) = runBlocking {
         ids = Sample.seed(tasks, tags, projects, preferences, persian, clock.today())
-        preferences.update { it.copy(themeMode = theme) }
+        // Preferences outlive a test inside one process, so every shot starts from the same place.
+        preferences.update { it.copy(themeMode = theme, lastTab = "today", board = it.board.copy(layout = ViewLayout.List)) }
     }
 
     private fun launch() = ActivityScenario.launch(MainActivity::class.java).also { settle() }
@@ -92,6 +93,15 @@ class AppScreenshotTest {
         settle()
     }
 
+    /** Opens the timeline header's scale menu (the chip shows [current]) and chooses [target]. */
+    private fun scaleTo(current: String, target: String) {
+        compose.onAllNodes(hasText(current) and hasClickAction())[0].performClick()
+        settle()
+        val items = compose.onAllNodes(hasText(target) and hasClickAction())
+        items[items.fetchSemanticsNodes().size - 1].performClick()
+        settle()
+    }
+
     private fun openCreateMenu() {
         compose.onAllNodes(hasClickAction() and androidx.compose.ui.test.hasContentDescription("Create"))[0].performClick()
         settle()
@@ -102,6 +112,7 @@ class AppScreenshotTest {
     @Test
     fun englishLight() {
         seed()
+        runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.List)) } }
         launch().use {
             shoot("today")
             tap("Board")
@@ -160,12 +171,11 @@ class AppScreenshotTest {
             compose.onNodeWithText("Draft the launch brief").performTouchInput { swipeUp() }
             settle()
             shoot("timeline-week-more")
-            tap("Day")
+            scaleTo("Week", "Day")
             shoot("timeline-day")
-            compose.onNode(androidx.compose.ui.test.hasContentDescription("Hour grid")).performClick()
-            settle()
+            scaleTo("Day", "Day · Hour grid")
             shoot("timeline-day-grid")
-            tap("Month")
+            scaleTo("Day · Hour grid", "Month")
             shoot("timeline-month")
         }
     }
@@ -177,8 +187,23 @@ class AppScreenshotTest {
         runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.Timeline), lastTab = "board") } }
         launch().use {
             shoot("timeline-week-fa")
-            tap("روز")
+            scaleTo("هفته", "روز")
             shoot("timeline-day-fa")
+        }
+    }
+
+    @Test
+    fun viewSwitcherAndOptions() {
+        seed()
+        runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.List), lastTab = "board") } }
+        launch().use {
+            compose.onAllNodes(hasText("List") and hasClickAction())[0].performClick()
+            settle()
+            captureScreenRoboImage("${SHOTS}/view-menu.png")
+            tap("Table")
+            compose.onAllNodes(hasClickAction() and androidx.compose.ui.test.hasContentDescription("View"))[0].performClick()
+            settle()
+            captureScreenRoboImage("${SHOTS}/view-sheet.png")
         }
     }
 
@@ -197,6 +222,7 @@ class AppScreenshotTest {
     @Config(qualifiers = "fa-w412dp-h915dp-xxhdpi")
     fun persianJalali() {
         seed(persian = true)
+        runBlocking { preferences.update { it.copy(board = it.board.copy(layout = ViewLayout.List)) } }
         launch().use {
             shoot("today-fa")
             tap("بورد")

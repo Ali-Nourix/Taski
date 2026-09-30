@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowUp
 import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Remove
@@ -227,6 +228,7 @@ private fun EditorContent(
     var title by rememberSaveable(task.id) { mutableStateOf(task.title) }
     var notes by rememberSaveable(task.id) { mutableStateOf(task.notes) }
     var addingSubtask by rememberSaveable { mutableStateOf(false) }
+    var showMore by rememberSaveable(task.id) { mutableStateOf(false) }
     val activeTimer = state.activeTimer?.takeIf { it.taskId == task.id }
 
     LazyColumn(Modifier.fillMaxSize().imePadding(), contentPadding = contentPadding) {
@@ -268,11 +270,16 @@ private fun EditorContent(
                 PropertyLine(TaskIcons.Due, stringResource(UiR.string.pick_date), { sheet = Sheet.Due }) {
                     if (task.dueDate != null) DueChip(task) else EmptyValue()
                 }
-                PropertyLine(TaskIcons.Repeat, stringResource(UiR.string.pick_repeat), { sheet = Sheet.Repeat }) {
-                    if (task.repeat != null) ValueText(repeatLabel(task.repeat)) else EmptyValue()
+                // The rarely used properties show once they hold a value, or when asked for; a page of empty rows is noise.
+                if (task.repeat != null || showMore) {
+                    PropertyLine(TaskIcons.Repeat, stringResource(UiR.string.pick_repeat), { sheet = Sheet.Repeat }) {
+                        if (task.repeat != null) ValueText(repeatLabel(task.repeat)) else EmptyValue()
+                    }
                 }
-                PropertyLine(TaskIcons.Reminder, stringResource(UiR.string.pick_reminder), { sheet = Sheet.Reminder }) {
-                    if (task.reminderOffsetMinutes != null) ValueText(reminderLabel(task.reminderOffsetMinutes)) else EmptyValue()
+                if (task.reminderOffsetMinutes != null || showMore) {
+                    PropertyLine(TaskIcons.Reminder, stringResource(UiR.string.pick_reminder), { sheet = Sheet.Reminder }) {
+                        if (task.reminderOffsetMinutes != null) ValueText(reminderLabel(task.reminderOffsetMinutes)) else EmptyValue()
+                    }
                 }
                 PropertyLine(Icons.Rounded.KeyboardDoubleArrowUp, stringResource(UiR.string.pick_priority), { sheet = Sheet.Priority }) {
                     task.priority?.let { PriorityChip(it) } ?: EmptyValue()
@@ -289,23 +296,39 @@ private fun EditorContent(
                         }
                     }
                 }
-                PropertyLine(TaskIcons.Progress, stringResource(R.string.editor_progress), {
-                    if (task.progress == null) viewModel.edit(TaskEdit.Progress(StepProgress(0, 5)))
-                    sheet = Sheet.Progress
-                }) {
-                    val progress = task.progress
-                    if (progress == null) EmptyValue() else ProgressValue(progress) {
-                        viewModel.edit(TaskEdit.Progress(progress.copy(done = (progress.clampedDone + 1).coerceAtMost(progress.total))))
+                if (task.progress != null || showMore) {
+                    PropertyLine(TaskIcons.Progress, stringResource(R.string.editor_progress), {
+                        if (task.progress == null) viewModel.edit(TaskEdit.Progress(StepProgress(0, 5)))
+                        sheet = Sheet.Progress
+                    }) {
+                        val progress = task.progress
+                        if (progress == null) EmptyValue() else ProgressValue(progress) {
+                            viewModel.edit(TaskEdit.Progress(progress.copy(done = (progress.clampedDone + 1).coerceAtMost(progress.total))))
+                        }
                     }
                 }
-                PropertyLine(TaskIcons.Timer, stringResource(R.string.editor_timer), {
-                    if (task.timerMinutes == null) viewModel.edit(TaskEdit.Timer(state.defaultTimerMinutes)) else sheet = Sheet.Timer
-                }) {
-                    val minutes = task.timerMinutes
-                    when {
-                        activeTimer != null -> LiveTimerChip(activeTimer, onClick = onOpenTimer)
-                        minutes != null -> TimerValue(minutes) { viewModel.startFocus(); onOpenTimer() }
-                        else -> EmptyValue()
+                if (task.timerMinutes != null || activeTimer != null || showMore) {
+                    PropertyLine(TaskIcons.Timer, stringResource(R.string.editor_timer), {
+                        if (task.timerMinutes == null) viewModel.edit(TaskEdit.Timer(state.defaultTimerMinutes)) else sheet = Sheet.Timer
+                    }) {
+                        val minutes = task.timerMinutes
+                        when {
+                            activeTimer != null -> LiveTimerChip(activeTimer, onClick = onOpenTimer)
+                            minutes != null -> TimerValue(minutes) { viewModel.startFocus(); onOpenTimer() }
+                            else -> EmptyValue()
+                        }
+                    }
+                }
+                val somethingHidden = task.repeat == null || task.reminderOffsetMinutes == null || task.progress == null || (task.timerMinutes == null && activeTimer == null)
+                if (!showMore && somethingHidden) {
+                    PropertyLine(Icons.Rounded.MoreHoriz, stringResource(R.string.editor_more), { showMore = true }) {
+                        Text(
+                            stringResource(R.string.editor_more_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
             }
