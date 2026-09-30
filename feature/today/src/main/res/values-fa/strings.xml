@@ -12,4 +12,7 @@
     <string name="today_stat_open">باز</string>
     <string name="today_stat_overdue">عقب افتاده</string>
     <string name="today_stat_focus">تمرکز</string>
+    <string name="today_up_next">بعدی</string>
+    <string name="today_focusing">در حال تمرکز</string>
+    <string name="today_done_all">امروز تمام شد</string>
 </resources>

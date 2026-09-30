@@ -75,7 +75,7 @@ fun SectionHeader(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 24.dp, bottom = 4.dp).semantics { heading() },
+        modifier = modifier.fillMaxWidth().padding(start = 28.dp, end = 12.dp, top = 24.dp, bottom = 8.dp).semantics { heading() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

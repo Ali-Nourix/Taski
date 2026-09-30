@@ -10,18 +10,18 @@ It works fully offline and without an account. Its storage is already shaped for
 a later sync with Supabase; see [docs/SYNC.md](docs/SYNC.md).
 
 <p>
-<img src="docs/screenshots/board-table.png" width="260" alt="Board as a table: frozen task column, sortable headers">
+<img src="docs/screenshots/today.png" width="260" alt="Today: Up next, then sections as containers">
 <img src="docs/screenshots/board-list.png" width="260" alt="Board as a list grouped by status">
-<img src="docs/screenshots/board-kanban.png" width="260" alt="Board as kanban">
-</p>
-<p>
 <img src="docs/screenshots/editor.png" width="260" alt="A task as a page, with its properties">
-<img src="docs/screenshots/task-sheet.png" width="260" alt="Long-press a task for its sheet">
-<img src="docs/screenshots/project.png" width="260" alt="A project as a page">
 </p>
 <p>
-<img src="docs/screenshots/today.png" width="260" alt="Today">
+<img src="docs/screenshots/board-table.png" width="260" alt="Board as a table: frozen task column, sortable headers">
 <img src="docs/screenshots/board-kanban-dark.png" width="260" alt="Board as kanban, dark">
+<img src="docs/screenshots/projects.png" width="260" alt="Projects, each with its own shape">
+</p>
+<p>
+<img src="docs/screenshots/today-dark.png" width="260" alt="Today in dark, with a running timer">
+<img src="docs/screenshots/project.png" width="260" alt="A project as a page">
 <img src="docs/screenshots/today-fa.png" width="260" alt="Today in Persian with Jalali dates">
 </p>
 
@@ -54,13 +54,23 @@ digest in notifications, dynamic colour, adaptive layout for tablets.
 
 ## Design
 
-The app is laid out the way a document workspace would lay it out: a task is a
-line on a page, a project is a page, a task opened is a page with a property
-table under its title. The default **Paper** theme is warm monochrome — near-black
-ink `#37352F` on white, grey `#787774` for everything secondary, 1dp hairlines
-`#E9E9E7` instead of cards and shadows, small corner radii — and colour is kept for
-meaning: status, priority, tag and project colours are Notion's muted pastels,
-an overdue date is red. Wallpaper colours (Material You) are a setting.
+Calm, tonal and quiet, with one moment of expression per screen. Pages are a
+warm off-white canvas; content sits in large rounded containers one tonal step
+above it, so structure comes from surface rather than lines — the way Google's
+own Material 3 Expressive apps (Clock, Contacts, Digital Wellbeing) group
+things. Text is warm ink and grey; colour is scarce and means something:
+status, priority, tag and project colours are muted pastels, an overdue date is
+red, selection is a soft blue container, and the one saturated fill on a page is
+its action.
+
+Each screen has a single bold moment that does work. **Today** opens with
+*Up next*: the task to do now, the day's progress as a wavy line, and a button
+to start focusing on it — or, while a timer runs, the countdown in large
+numerals. Projects are shape-coded: each keeps its own expressive shape (cookie,
+clover, sunny, pentagon…) from its id. Rows carry only what is needed at a
+glance — priority and repeat are glyphs, not words — and every property is
+still a button that edits it in place. Wallpaper colours (Material You) are a
+setting.
 
 ## Material 3 Expressive
 

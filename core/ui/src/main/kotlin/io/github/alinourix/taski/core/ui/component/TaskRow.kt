@@ -1,7 +1,6 @@
 package io.github.alinourix.taski.core.ui.component
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -81,6 +81,8 @@ fun TaskRow(
     showDivider: Boolean = true,
     /** Off on board cards, where a long-press picks the card up instead. */
     longPressMenu: Boolean = true,
+    /** The container the row sits in; the row draws it itself so a swipe never shows the page behind. */
+    containerColor: Color = Color.Transparent,
 ) {
     val task = item.task
     val menu = onEdit?.takeIf { longPressMenu }
@@ -125,15 +127,17 @@ fun TaskRow(
     }
 
     when (style) {
-        RowStyle.List -> Column(modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+        RowStyle.List -> Column(modifier.fillMaxWidth().background(containerColor)) {
             body()
-            if (showDivider) HorizontalDivider(Modifier.padding(start = 52.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            if (showDivider) HorizontalDivider(Modifier.padding(start = 52.dp, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
         }
+        // A card is one tonal step above its column: no border, the surface says it.
         RowStyle.Card -> Surface(
             modifier = modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceContainerLowest,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            color = MaterialTheme.colorScheme.surfaceBright,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
         ) { body() }
     }
 }
@@ -149,8 +153,8 @@ private fun PropertyLine(item: TaskItem, extras: RowExtras, onEdit: ((TaskProper
     if (!hasAny) return
     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp), itemVerticalAlignment = Alignment.CenterVertically) {
         task.dueDate?.let { DueChip(task, onClick = edit(TaskProperty.Due)) }
-        task.priority?.let { PriorityChip(it, onClick = edit(TaskProperty.Priority)) }
-        task.repeat?.let { RepeatChip(it, onClick = edit(TaskProperty.Repeat)) }
+        task.priority?.let { PriorityChip(it, onClick = edit(TaskProperty.Priority), showLabel = false) }
+        task.repeat?.let { RepeatChip(it, onClick = edit(TaskProperty.Repeat), showLabel = false) }
         timer?.let { LiveTimerChip(it) }
         if (item.subtaskCount > 0) {
             PropertyToken(
@@ -187,6 +191,7 @@ fun SwipeableTaskRow(
     onEdit: ((TaskProperty) -> Unit)? = null,
     extras: RowExtras = RowExtras(),
     showDivider: Boolean = true,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
 ) {
     val state = rememberSwipeToDismissBoxState()
     LaunchedEffect(state.currentValue) {
@@ -206,7 +211,7 @@ fun SwipeableTaskRow(
             val (color, icon, align) = when (direction) {
                 SwipeToDismissBoxValue.StartToEnd -> Triple(scheme.primaryContainer, Icons.Rounded.DoneAll, Alignment.CenterStart)
                 SwipeToDismissBoxValue.EndToStart -> Triple(scheme.errorContainer, Icons.Rounded.Delete, Alignment.CenterEnd)
-                SwipeToDismissBoxValue.Settled -> Triple(scheme.surface, null, Alignment.Center)
+                SwipeToDismissBoxValue.Settled -> Triple(containerColor, null, Alignment.Center)
             }
             val label = when (direction) {
                 SwipeToDismissBoxValue.StartToEnd -> stringResource(R.string.swipe_complete)
@@ -221,13 +226,13 @@ fun SwipeableTaskRow(
             }
         },
     ) {
-        TaskRow(item, onToggle, onClick, onEdit = onEdit, extras = extras, showDivider = showDivider)
+        TaskRow(item, onToggle, onClick, onEdit = onEdit, extras = extras, showDivider = showDivider, containerColor = containerColor)
     }
 }
 
-/** A timer token that ticks on its own, so the list around it never recomposes per second. */
+/** The countdown as text that ticks on its own, so nothing around it recomposes per second. */
 @Composable
-fun LiveTimerChip(state: FocusTimerState, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+fun rememberTimerLabel(state: FocusTimerState): String {
     val persian = LocalUiConfig.current.persian
     val clock = LocalClock.current
     var now by remember { mutableLongStateOf(clock.nowMillis()) }
@@ -238,5 +243,11 @@ fun LiveTimerChip(state: FocusTimerState, modifier: Modifier = Modifier, onClick
         }
         now = clock.nowMillis()
     }
-    TimerChip(FocusTimerState.formatClock(state.remainingSeconds(now)).localizeDigits(persian), state.isRunning, modifier, onClick)
+    return FocusTimerState.formatClock(state.remainingSeconds(now)).localizeDigits(persian)
+}
+
+/** A timer token that ticks on its own. */
+@Composable
+fun LiveTimerChip(state: FocusTimerState, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    TimerChip(rememberTimerLabel(state), state.isRunning, modifier, onClick)
 }

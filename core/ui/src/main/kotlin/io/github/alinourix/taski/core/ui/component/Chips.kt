@@ -50,6 +50,8 @@ fun PropertyToken(
     iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: (() -> Unit)? = null,
+    /** False shows the glyph alone, with the label kept for screen readers. */
+    showLabel: Boolean = true,
 ) {
     Row(
         modifier = modifier
@@ -59,8 +61,10 @@ fun PropertyToken(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
-        icon?.let { Icon(it, contentDescription = null, tint = iconTint, modifier = Modifier.size(14.dp)) }
-        Text(label, style = MaterialTheme.typography.labelMedium, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        icon?.let { Icon(it, contentDescription = if (showLabel) null else label, tint = iconTint, modifier = Modifier.size(if (showLabel) 14.dp else 16.dp)) }
+        if (showLabel || icon == null) {
+            Text(label, style = MaterialTheme.typography.labelMedium, color = textColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
@@ -106,12 +110,12 @@ fun DueChip(task: Task, modifier: Modifier = Modifier, onClick: (() -> Unit)? = 
 }
 
 @Composable
-fun PriorityChip(priority: Priority, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) =
-    PropertyToken(priorityLabel(priority), modifier, TaskIcons.priority(priority), iconTint = priority.roles().accent, onClick = onClick)
+fun PriorityChip(priority: Priority, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, showLabel: Boolean = true) =
+    PropertyToken(priorityLabel(priority), modifier, TaskIcons.priority(priority), iconTint = priority.roles().accent, onClick = onClick, showLabel = showLabel)
 
 @Composable
-fun RepeatChip(rule: RepeatRule, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) =
-    PropertyToken(repeatLabel(rule), modifier, TaskIcons.Repeat, onClick = onClick)
+fun RepeatChip(rule: RepeatRule, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, showLabel: Boolean = true) =
+    PropertyToken(repeatLabel(rule), modifier, TaskIcons.Repeat, onClick = onClick, showLabel = showLabel)
 
 @Composable
 fun TagChip(tag: Tag, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) =

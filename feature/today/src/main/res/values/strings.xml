@@ -12,4 +12,7 @@
     <string name="today_stat_open">Open</string>
     <string name="today_stat_overdue">Overdue</string>
     <string name="today_stat_focus">Focused</string>
+    <string name="today_up_next">Up next</string>
+    <string name="today_focusing">Focusing</string>
+    <string name="today_done_all">Done for today</string>
 </resources>

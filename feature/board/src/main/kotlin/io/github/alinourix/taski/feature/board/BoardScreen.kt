@@ -42,6 +42,9 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LeadingIconTab
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +58,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -71,7 +75,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.alinourix.taski.core.designsystem.component.ConnectedToggleGroup
 import io.github.alinourix.taski.core.designsystem.component.EmptyState
 import io.github.alinourix.taski.core.designsystem.component.LoadingState
 import io.github.alinourix.taski.core.domain.model.GroupBy
@@ -125,6 +128,7 @@ fun BoardScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.board_title), style = MaterialTheme.typography.titleLargeEmphasized) },
+                subtitle = { SummaryText(state) },
                 actions = {
                     IconButton(onClick = { searching = !showSearch; if (!searching) viewModel.search.value = "" }, shapes = IconButtonDefaults.shapes()) {
                         Icon(if (showSearch) Icons.Rounded.SearchOff else Icons.Rounded.Search, stringResource(R.string.board_search_open))
@@ -143,7 +147,6 @@ fun BoardScreen(
                 AnimatedVisibility(showSearch) { SearchField(query) { viewModel.search.value = it } }
                 ViewsRow(state, onApply = viewModel::apply, onDelete = viewModel::deleteView)
                 FiltersRow(state.view, onOpen = { filterSheet = it }, onClear = viewModel::clearFilters)
-                Summary(state)
                 val onEdit = { id: String -> { property: TaskProperty -> sheet.open(id, property) } }
                 when {
                     state.loading -> LoadingState()
@@ -202,7 +205,7 @@ fun BoardScreen(
     if (saving) SaveViewDialog(onDismiss = { saving = false }) { viewModel.saveView(it); saving = false }
 }
 
-/** The three views of the same rows, as a connected button group. */
+/** The three views of the same rows as quiet tabs: the selected one is underlined, nothing is filled. */
 @Composable
 private fun ViewTabs(layout: ViewLayout, onSelect: (ViewLayout) -> Unit) {
     val labels = mapOf(
@@ -215,15 +218,20 @@ private fun ViewTabs(layout: ViewLayout, onSelect: (ViewLayout) -> Unit) {
         ViewLayout.Table to Icons.Rounded.TableChart,
         ViewLayout.Board to Icons.Rounded.ViewColumn,
     )
-    ConnectedToggleGroup(
-        options = ViewLayout.entries,
-        selected = layout,
-        onSelect = onSelect,
-        label = labels::getValue,
-        icon = icons::getValue,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
-        height = 36.dp,
-    )
+    SecondaryTabRow(
+        selectedTabIndex = ViewLayout.entries.indexOf(layout),
+        containerColor = MaterialTheme.colorScheme.surface,
+        divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) },
+    ) {
+        ViewLayout.entries.forEach { entry ->
+            LeadingIconTab(
+                selected = entry == layout,
+                onClick = { onSelect(entry) },
+                text = { Text(labels.getValue(entry), maxLines = 1) },
+                icon = { Icon(icons.getValue(entry), null, Modifier.size(18.dp)) },
+            )
+        }
+    }
 }
 
 @Composable
@@ -287,7 +295,7 @@ private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onCl
     val clearLabel = stringResource(R.string.board_clear_filters)
     ButtonGroup(
         overflowIndicator = { menu -> ButtonGroupDefaults.OverflowIndicator(menu) },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         for ((sheet, label, count) in filters) {
             val text = if (count > 0) "$label ${count.toString().localizeDigits(persian)}" else label
@@ -298,6 +306,11 @@ private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onCl
                         checked = count > 0,
                         onCheckedChange = { onOpen(sheet) },
                         interactionSource = interaction,
+                        colors = ToggleButtonDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
                         contentPadding = PaddingValues(horizontal = 10.dp),
                         modifier = Modifier.weight(1f).height(34.dp).animateWidth(interaction),
                     ) {
@@ -329,19 +342,14 @@ private fun FiltersRow(view: ViewDefinition, onOpen: (FilterSheet) -> Unit, onCl
 }
 
 @Composable
-private fun Summary(state: BoardState) {
+private fun SummaryText(state: BoardState) {
     val persian = LocalUiConfig.current.persian
     val parts = listOfNotNull(
         stringResource(R.string.board_summary_total, state.summary.total),
         stringResource(R.string.board_summary_done, state.summary.done),
         state.summary.overdue.takeIf { it > 0 }?.let { stringResource(R.string.board_summary_overdue, it) },
     )
-    Text(
-        parts.joinToString(" · ").localizeDigits(persian),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 2.dp),
-    )
+    Text(parts.joinToString(" · ").localizeDigits(persian), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 /**
@@ -363,12 +371,12 @@ private fun Toolbar(
     HorizontalFloatingToolbar(
         expanded = true,
         floatingActionButton = {
-            FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = onAddTask) {
+            FloatingToolbarDefaults.StandardFloatingActionButton(onClick = onAddTask) {
                 Icon(Icons.Rounded.Add, stringResource(R.string.board_add_task))
             }
         },
         modifier = modifier,
-        colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
     ) {
         Box {
             IconButton(onClick = { groupMenu = true }) { Icon(Icons.Rounded.TableRows, stringResource(R.string.board_group)) }

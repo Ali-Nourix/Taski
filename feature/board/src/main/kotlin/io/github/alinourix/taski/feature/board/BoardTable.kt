@@ -172,7 +172,7 @@ internal fun BoardTable(
 
 @Composable
 private fun HeaderRow(view: ViewDefinition, columns: List<TableColumn>, scroll: ScrollState, onSort: (SortKey) -> Unit) {
-    Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+    Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerLow)) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(Modifier.height(36.dp)) {
             HeaderCell(stringResource(R.string.col_task), Icons.Rounded.Title, view, SortKey.Title, onSort, Modifier.width(TitleWidth))

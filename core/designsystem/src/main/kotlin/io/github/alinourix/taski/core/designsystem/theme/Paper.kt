@@ -9,107 +9,107 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * Paper: the default look. A document-like canvas where colour is scarce and
- * means something — ink and grey for text, one blue for action and focus,
- * hairlines for structure, and muted pastels only on tags and states.
- * The values are Notion's, so a task board reads the way a Notion database does.
+ * Paper: the default look — calm, warm and tonal. Pages are an off-white
+ * canvas; content sits in large rounded containers one tonal step above it, so
+ * structure comes from surface, not from lines. Colour is scarce: ink and warm
+ * grey for text, one blue for action and the hero, muted pastels only where a
+ * value has a colour (tags, states). Selection is tonal; saturated fills are
+ * kept for the action button and a single hero moment per screen.
  */
 object Paper {
-    val InkLight = Color(0xFF37352F)
-    val InkDark = Color(0xFFD4D4D4)
-    val MutedLight = Color(0xFF787774)
-    val MutedDark = Color(0xFF9B9B9B)
-    val HairlineLight = Color(0xFFE9E9E7)
-    val HairlineDark = Color(0xFF2F2F2F)
-    val Blue = Color(0xFF2383E2)
-    val BlueDark = Color(0xFF529CCA)
+    val InkLight = Color(0xFF2B2A26)
+    val InkDark = Color(0xFFE8E6E1)
+    val MutedLight = Color(0xFF66645E)
+    val MutedDark = Color(0xFFA5A29B)
+    val Blue = Color(0xFF2F6FE0)
+    val BlueDark = Color(0xFF8DB4FF)
 
     fun lightScheme(): ColorScheme = lightColorScheme(
         primary = Blue,
         onPrimary = Color.White,
-        primaryContainer = Color(0xFFE7F3F8),
-        onPrimaryContainer = Color(0xFF1F5B85),
+        primaryContainer = Color(0xFFDCE8FB),
+        onPrimaryContainer = Color(0xFF0F2E66),
         inversePrimary = BlueDark,
-        // Selection and toggles stay ink-on-grey, like Notion's selected rows.
-        secondary = InkLight,
+        // Selection and toggles are warm-grey tonal, never a saturated fill.
+        secondary = Color(0xFF5B5951),
         onSecondary = Color.White,
-        secondaryContainer = Color(0xFFEDEDEB),
+        secondaryContainer = Color(0xFFE6E3DA),
         onSecondaryContainer = InkLight,
-        tertiary = Color(0xFFD9730D),
+        tertiary = Color(0xFFB85F00),
         onTertiary = Color.White,
-        tertiaryContainer = Color(0xFFFBECDD),
-        onTertiaryContainer = Color(0xFF6B3A09),
-        background = Color.White,
+        tertiaryContainer = Color(0xFFFBE7D2),
+        onTertiaryContainer = Color(0xFF5E3000),
+        background = Color(0xFFFBFAF7),
         onBackground = InkLight,
-        surface = Color.White,
+        surface = Color(0xFFFBFAF7),
         onSurface = InkLight,
-        surfaceVariant = Color(0xFFF1F1EF),
+        surfaceVariant = Color(0xFFEDEAE2),
         onSurfaceVariant = MutedLight,
         surfaceTint = Color.Transparent,
-        inverseSurface = Color(0xFF2F2F2F),
-        inverseOnSurface = Color(0xFFF1F1EF),
-        error = Color(0xFFD44C47),
+        inverseSurface = Color(0xFF302F2B),
+        inverseOnSurface = Color(0xFFF3F1EB),
+        error = Color(0xFFC93B36),
         onError = Color.White,
-        errorContainer = Color(0xFFFDEBEC),
-        onErrorContainer = Color(0xFF9F2F2D),
-        outline = Color(0xFFC4C3BF),
-        outlineVariant = HairlineLight,
+        errorContainer = Color(0xFFFCE4E2),
+        onErrorContainer = Color(0xFF8A2421),
+        outline = Color(0xFFB9B6AD),
+        outlineVariant = Color(0xFFE3E0D7),
         scrim = Color(0xFF0F0F0F),
-        surfaceBright = Color.White,
-        surfaceDim = Color(0xFFEEEEEC),
-        surfaceContainerLowest = Color.White,
-        surfaceContainerLow = Color(0xFFFBFBFA),
-        surfaceContainer = Color(0xFFF7F6F3),
-        surfaceContainerHigh = Color(0xFFF1F1EF),
-        surfaceContainerHighest = Color(0xFFEBEBEA),
+        surfaceBright = Color(0xFFFFFFFF),
+        surfaceDim = Color(0xFFE9E6DE),
+        surfaceContainerLowest = Color(0xFFFFFFFF),
+        surfaceContainerLow = Color(0xFFF4F2EC),
+        surfaceContainer = Color(0xFFEFECE5),
+        surfaceContainerHigh = Color(0xFFE9E6DE),
+        surfaceContainerHighest = Color(0xFFE3E0D7),
     )
 
     fun darkScheme(): ColorScheme = darkColorScheme(
         primary = BlueDark,
-        onPrimary = Color(0xFF0B2233),
-        primaryContainer = Color(0xFF1F3A4D),
-        onPrimaryContainer = Color(0xFFBFDDF1),
+        onPrimary = Color(0xFF0A2A5E),
+        primaryContainer = Color(0xFF22406F),
+        onPrimaryContainer = Color(0xFFD9E5FF),
         inversePrimary = Blue,
-        secondary = InkDark,
-        onSecondary = Color(0xFF191919),
-        secondaryContainer = Color(0xFF333333),
+        secondary = Color(0xFFC9C6BE),
+        onSecondary = Color(0xFF2B2A26),
+        secondaryContainer = Color(0xFF3A3935),
         onSecondaryContainer = InkDark,
-        tertiary = Color(0xFFC77D48),
-        onTertiary = Color(0xFF2A1504),
-        tertiaryContainer = Color(0xFF4A2F1A),
-        onTertiaryContainer = Color(0xFFF3D2B5),
-        background = Color(0xFF191919),
+        tertiary = Color(0xFFE39B57),
+        onTertiary = Color(0xFF3B1E00),
+        tertiaryContainer = Color(0xFF5A3510),
+        onTertiaryContainer = Color(0xFFFBDCBC),
+        background = Color(0xFF131211),
         onBackground = InkDark,
-        surface = Color(0xFF191919),
+        surface = Color(0xFF131211),
         onSurface = InkDark,
-        surfaceVariant = Color(0xFF252525),
+        surfaceVariant = Color(0xFF2A2926),
         onSurfaceVariant = MutedDark,
         surfaceTint = Color.Transparent,
-        inverseSurface = Color(0xFFE6E6E4),
-        inverseOnSurface = Color(0xFF252525),
-        error = Color(0xFFDF5452),
-        onError = Color(0xFF2B0606),
-        errorContainer = Color(0xFF522E2A),
-        onErrorContainer = Color(0xFFFFD1CD),
-        outline = Color(0xFF5A5A5A),
-        outlineVariant = HairlineDark,
+        inverseSurface = Color(0xFFE8E6E1),
+        inverseOnSurface = Color(0xFF2B2A26),
+        error = Color(0xFFFF8A82),
+        onError = Color(0xFF3B0907),
+        errorContainer = Color(0xFF5E2723),
+        onErrorContainer = Color(0xFFFFD8D3),
+        outline = Color(0xFF6A6861),
+        outlineVariant = Color(0xFF34332F),
         scrim = Color.Black,
-        surfaceBright = Color(0xFF2F2F2F),
-        surfaceDim = Color(0xFF141414),
-        surfaceContainerLowest = Color(0xFF141414),
-        surfaceContainerLow = Color(0xFF1C1C1C),
-        surfaceContainer = Color(0xFF202020),
-        surfaceContainerHigh = Color(0xFF252525),
-        surfaceContainerHighest = Color(0xFF2C2C2C),
+        surfaceBright = Color(0xFF373632),
+        surfaceDim = Color(0xFF0E0D0C),
+        surfaceContainerLowest = Color(0xFF0E0D0C),
+        surfaceContainerLow = Color(0xFF1B1A18),
+        surfaceContainer = Color(0xFF201F1C),
+        surfaceContainerHigh = Color(0xFF2A2926),
+        surfaceContainerHighest = Color(0xFF34332F),
     )
 
-    /** Crisp corners: small on chips and rows, softer only on sheets. */
+    /** Generous corners: containers and sheets are large, chips and tags stay small. */
     val shapes = Shapes(
-        extraSmall = RoundedCornerShape(4.dp),
-        small = RoundedCornerShape(6.dp),
-        medium = RoundedCornerShape(8.dp),
-        large = RoundedCornerShape(10.dp),
-        extraLarge = RoundedCornerShape(16.dp),
+        extraSmall = RoundedCornerShape(6.dp),
+        small = RoundedCornerShape(10.dp),
+        medium = RoundedCornerShape(16.dp),
+        large = RoundedCornerShape(22.dp),
+        extraLarge = RoundedCornerShape(28.dp),
     )
 }
 

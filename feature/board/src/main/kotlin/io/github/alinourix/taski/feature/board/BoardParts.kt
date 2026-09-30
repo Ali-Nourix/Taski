@@ -85,7 +85,7 @@ internal fun GroupHeader(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
             .clickable(onClick = onToggle)
-            .padding(start = 8.dp, end = 4.dp, top = 12.dp, bottom = 2.dp)
+            .padding(start = 24.dp, end = 12.dp, top = 12.dp, bottom = 2.dp)
             .heightIn(min = 40.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

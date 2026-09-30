@@ -139,8 +139,8 @@ private fun BoardColumn(
     }
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, border),
+        shape = MaterialTheme.shapes.extraLarge,
+        border = BorderStroke(1.5.dp, border),
         modifier = Modifier.width(280.dp).fillMaxHeight().dragAndDropTarget(
             shouldStartDragAndDrop = { event -> event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN) },
             target = target,

@@ -3,7 +3,7 @@ package io.github.alinourix.taski.feature.board
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.alinourix.taski.core.designsystem.component.sectionRow
 import io.github.alinourix.taski.core.domain.model.GroupBy
 import io.github.alinourix.taski.core.ui.component.NewTaskRow
 import io.github.alinourix.taski.core.ui.component.RowExtras
@@ -51,7 +52,9 @@ internal fun BoardList(
                 }
             }
             if (collapsed) continue
-            items(group.items, key = { group.id + "/" + it.id }, contentType = { "task" }) { item ->
+            // The group's tasks and its "+ New" line are one rounded container.
+            val slices = group.items.size + 1
+            itemsIndexed(group.items, key = { _, it -> group.id + "/" + it.id }, contentType = { _, _ -> "task" }) { index, item ->
                 SwipeableTaskRow(
                     item = item,
                     onToggle = { viewModel.actions.toggle(item) },
@@ -59,7 +62,7 @@ internal fun BoardList(
                     onClick = { onOpenTask(item.id) },
                     onEdit = onEdit(item.id),
                     extras = extras,
-                    modifier = Modifier.animateItem(),
+                    modifier = Modifier.animateItem().sectionRow(index, slices),
                 )
             }
             item(key = "n-" + group.id, contentType = "new") {
@@ -67,7 +70,7 @@ internal fun BoardList(
                     open = adding == group.id,
                     onOpenChange = { adding = if (it) group.id else null },
                     onAdd = { viewModel.addTask(it, group) },
-                    modifier = Modifier.animateItem(),
+                    modifier = Modifier.animateItem().sectionRow(slices - 1, slices),
                     // The plus sits on the checkbox column, the text on the title's.
                     padding = PaddingValues(start = 18.dp, end = 4.dp),
                 )

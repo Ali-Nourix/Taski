@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFlexibleTopAppBar
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,7 +39,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -46,12 +46,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.alinourix.taski.core.designsystem.component.EmptyState
 import io.github.alinourix.taski.core.designsystem.component.LoadingState
 import io.github.alinourix.taski.core.designsystem.component.SectionHeader
+import io.github.alinourix.taski.core.designsystem.component.ShapeIcon
+import io.github.alinourix.taski.core.designsystem.component.ShapeLetter
+import io.github.alinourix.taski.core.designsystem.component.sectionRow
 import io.github.alinourix.taski.core.designsystem.theme.AccentRoles
 import io.github.alinourix.taski.core.ui.LocalUiConfig
 import io.github.alinourix.taski.core.ui.format.localizeDigits
@@ -116,23 +118,26 @@ fun ProjectsScreen(
                     title = stringResource(UiR.string.inbox),
                     icon = { InboxIcon() },
                     onClick = { onOpenProject(null) },
+                    showDivider = false,
+                    modifier = Modifier.sectionRow(0, 1),
                 )
             }
-            item(key = "header") { SectionHeader(stringResource(R.string.projects_title), count = order.size) }
+            item(key = "header") { SectionHeader(stringResource(R.string.projects_title), count = order.size, modifier = Modifier.padding(start = 12.dp)) }
             if (order.isEmpty()) {
                 item(key = "empty") {
                     EmptyState(Icons.Rounded.FolderOpen, stringResource(R.string.projects_empty), body = stringResource(R.string.projects_empty_body))
                 }
             }
-            items(order, key = { it.project!!.id }) { summary ->
+            itemsIndexed(order, key = { _, it -> it.project!!.id }) { index, summary ->
                 val project = summary.project!!
                 ReorderableItem(reorder, key = project.id) { dragging ->
                     PageRow(
                         summary = summary,
                         title = project.name,
-                        icon = { PageIcon(project.name, project.color.roles()) },
+                        icon = { PageIcon(project.id, project.name, project.color.roles()) },
                         onClick = { onOpenProject(project.id) },
-                        modifier = (if (dragging) Modifier.shadow(6.dp, MaterialTheme.shapes.small) else Modifier)
+                        modifier = (if (dragging) Modifier.shadow(6.dp, MaterialTheme.shapes.large) else Modifier)
+                            .sectionRow(index, order.size + 1)
                             .longPressDraggableHandle(onDragStopped = {
                                 val i = order.indexOfFirst { it.project?.id == project.id }
                                 viewModel.move(project.id, order.getOrNull(i - 1)?.project?.id, order.getOrNull(i + 1)?.project?.id)
@@ -140,7 +145,7 @@ fun ProjectsScreen(
                     )
                 }
             }
-            item(key = "new") { NewProjectRow { creating = true } }
+            item(key = "new") { NewProjectRow(Modifier.sectionRow(order.size, order.size + 1)) { creating = true } }
         }
     }
 
@@ -158,72 +163,73 @@ private fun PageRow(
     icon: @Composable () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showDivider: Boolean = true,
 ) {
     val persian = LocalUiConfig.current.persian
-    Column(modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+    Column(modifier.fillMaxWidth()) {
         Row(
-            Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+            Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             icon()
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
                     stringResource(R.string.projects_open_count, summary.open, summary.done).localizeDigits(persian),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (summary.open + summary.done > 0) {
                 CircularProgressIndicator(
                     progress = { summary.fraction },
-                    strokeWidth = 2.5.dp,
+                    strokeWidth = 3.dp,
                     strokeCap = StrokeCap.Round,
                     gapSize = 0.dp,
                     trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(24.dp),
                 )
             }
         }
-        HorizontalDivider(Modifier.padding(start = 58.dp), color = MaterialTheme.colorScheme.outlineVariant)
+        if (showDivider) HorizontalDivider(Modifier.padding(start = 76.dp, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
 @Composable
-private fun NewProjectRow(onClick: () -> Unit) {
+private fun NewProjectRow(modifier: Modifier = Modifier, onClick: () -> Unit) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp).heightIn(min = 52.dp),
+        modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp).heightIn(min = 56.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Box(Modifier.size(28.dp), contentAlignment = Alignment.Center) { Icon(Icons.Rounded.Add, null, tint = muted, modifier = Modifier.size(20.dp)) }
-        Text(stringResource(R.string.projects_new), style = MaterialTheme.typography.bodyLarge, color = muted)
+        Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) { Icon(Icons.Rounded.Add, null, tint = muted, modifier = Modifier.size(22.dp)) }
+        Text(stringResource(R.string.projects_new), style = MaterialTheme.typography.titleMedium, color = muted)
     }
 }
 
-/** A page icon: the project's first letter on its pastel, with crisp corners. */
+private val SHAPES = listOf(
+    MaterialShapes.Cookie6Sided, MaterialShapes.Clover4Leaf, MaterialShapes.Sunny, MaterialShapes.Pentagon,
+    MaterialShapes.Cookie9Sided, MaterialShapes.Gem, MaterialShapes.Flower, MaterialShapes.SoftBurst,
+)
+
+/** A project keeps its shape for good: it comes from the id, not from where the project sits in the list. */
+internal fun shapeFor(projectId: String) = SHAPES[(projectId.hashCode() and Int.MAX_VALUE) % SHAPES.size]
+
+/** A project's page icon: its initial in one of the expressive shapes, on its own pastel. */
 @Composable
-internal fun PageIcon(name: String, roles: AccentRoles, size: Dp = 28.dp) {
-    Box(
-        Modifier.size(size).clip(MaterialTheme.shapes.small).background(roles.container),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            name.trim().take(1).uppercase(),
-            style = MaterialTheme.typography.titleSmall.copy(fontSize = (size.value * 0.5f).sp),
-            color = roles.onContainer,
-        )
-    }
+internal fun PageIcon(projectId: String, name: String, roles: AccentRoles, size: Dp = 44.dp) {
+    ShapeLetter(name.trim().take(1).uppercase(), polygon = shapeFor(projectId), containerColor = roles.container, contentColor = roles.onContainer, size = size)
 }
 
 @Composable
-internal fun InboxIcon(size: Dp = 28.dp) {
-    Box(
-        Modifier.size(size).clip(MaterialTheme.shapes.small).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(Icons.Rounded.Inbox, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(size * 0.6f))
-    }
+internal fun InboxIcon(size: Dp = 44.dp) {
+    ShapeIcon(
+        Icons.Rounded.Inbox,
+        polygon = MaterialShapes.Square,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        size = size,
+    )
 }

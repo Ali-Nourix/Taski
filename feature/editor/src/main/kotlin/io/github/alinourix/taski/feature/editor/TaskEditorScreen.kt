@@ -1,5 +1,6 @@
 package io.github.alinourix.taski.feature.editor
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,14 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -80,6 +83,8 @@ import io.github.alinourix.taski.core.designsystem.component.EmptyState
 import io.github.alinourix.taski.core.designsystem.component.GroupedShapes
 import io.github.alinourix.taski.core.designsystem.component.LoadingState
 import io.github.alinourix.taski.core.designsystem.component.SectionHeader
+import io.github.alinourix.taski.core.designsystem.component.Sections
+import io.github.alinourix.taski.core.designsystem.component.sectionRow
 import io.github.alinourix.taski.core.domain.model.ActivityKind
 import io.github.alinourix.taski.core.domain.model.StepProgress
 import io.github.alinourix.taski.core.domain.model.TaskEdit
@@ -246,7 +251,13 @@ private fun EditorContent(
             )
         }
         item(key = "properties") {
-            Column(Modifier.padding(horizontal = 12.dp)) {
+            Column(
+                Modifier
+                    .padding(horizontal = Sections.Margin)
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+            ) {
                 PropertyLine(Icons.Rounded.Timelapse, stringResource(R.string.editor_status), { sheet = Sheet.Status }) {
                     StatusChip(task.status)
                 }
@@ -295,7 +306,7 @@ private fun EditorContent(
                 }
             }
         }
-        item(key = "divider") { HorizontalDivider(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant) }
+        item(key = "gap") { Spacer(Modifier.height(16.dp)) }
         item(key = "notes") {
             PlainField(
                 value = notes,
@@ -308,21 +319,28 @@ private fun EditorContent(
         }
 
         item(key = "subtasks") { SectionHeader(stringResource(R.string.editor_subtasks), count = state.subtasks.size.takeIf { it > 0 }) }
-        items(state.subtasks, key = { it.id }) { sub ->
-            TaskRow(item = sub, onToggle = { viewModel.toggle(sub.id) }, onClick = { onOpenTask(sub.id) })
+        itemsIndexed(state.subtasks, key = { _, it -> it.id }) { index, sub ->
+            TaskRow(
+                item = sub,
+                onToggle = { viewModel.toggle(sub.id) },
+                onClick = { onOpenTask(sub.id) },
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                modifier = Modifier.sectionRow(index, state.subtasks.size + 1),
+            )
         }
         item(key = "add-subtask") {
             NewTaskRow(
                 open = addingSubtask,
                 onOpenChange = { addingSubtask = it },
                 onAdd = viewModel::addSubtask,
+                modifier = Modifier.sectionRow(state.subtasks.size, state.subtasks.size + 1),
                 padding = PaddingValues(start = 18.dp, end = 4.dp),
             )
         }
 
         item(key = "blockers") { SectionHeader(stringResource(R.string.editor_blocked_by), count = state.blockers.size.takeIf { it > 0 }) }
-        items(state.blockers, key = { "dep-" + it.id }) { blocker ->
-            Column {
+        itemsIndexed(state.blockers, key = { _, it -> "dep-" + it.id }) { index, blocker ->
+            Column(Modifier.sectionRow(index, state.blockers.size + 1)) {
                 Row(
                     Modifier.fillMaxWidth().clickable { onOpenTask(blocker.id) }.padding(start = 18.dp, end = 4.dp).heightIn(min = 48.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -334,12 +352,17 @@ private fun EditorContent(
                         Icon(Icons.Rounded.Close, stringResource(R.string.editor_remove), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                     }
                 }
-                HorizontalDivider(Modifier.padding(start = 52.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(Modifier.padding(start = 52.dp, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
             }
         }
         item(key = "add-blocker") {
             Row(
-                Modifier.fillMaxWidth().clickable { sheet = Sheet.Dependency }.padding(start = 18.dp, end = 16.dp).heightIn(min = 44.dp),
+                Modifier
+                    .sectionRow(state.blockers.size, state.blockers.size + 1)
+                    .fillMaxWidth()
+                    .clickable { sheet = Sheet.Dependency }
+                    .padding(start = 18.dp, end = 16.dp)
+                    .heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {

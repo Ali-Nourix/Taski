@@ -1,7 +1,6 @@
 package io.github.alinourix.taski.feature.projects
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -58,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.alinourix.taski.core.designsystem.component.EmptyState
 import io.github.alinourix.taski.core.designsystem.component.LoadingState
+import io.github.alinourix.taski.core.designsystem.component.sectionRow
 import io.github.alinourix.taski.core.domain.model.TaskItem
 import io.github.alinourix.taski.core.ui.LocalUiConfig
 import io.github.alinourix.taski.core.ui.component.NewTaskRow
@@ -204,10 +204,10 @@ private fun ProjectPage(
         contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding() + 96.dp),
     ) {
         item(key = "title") { PageTitle(state, name) }
-        items(order, key = { it.id }) { item ->
+        itemsIndexed(order, key = { _, it -> it.id }) { index, item ->
             ReorderableItem(reorder, key = item.id) { dragging ->
-                Column(if (dragging) Modifier.shadow(6.dp, MaterialTheme.shapes.small) else Modifier) {
-                    Row(Modifier.background(MaterialTheme.colorScheme.surface), verticalAlignment = Alignment.CenterVertically) {
+                Column((if (dragging) Modifier.shadow(6.dp, MaterialTheme.shapes.large) else Modifier).sectionRow(index, order.size + 1)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         SwipeableTaskRow(
                             item = item,
                             onToggle = { viewModel.actions.toggle(item) },
@@ -232,12 +232,18 @@ private fun ProjectPage(
             }
         }
         item(key = "new") {
-            NewTaskRow(open = adding, onOpenChange = onAddingChange, onAdd = viewModel::add, padding = PaddingValues(start = 18.dp, end = 4.dp))
+            NewTaskRow(
+                open = adding,
+                onOpenChange = onAddingChange,
+                onAdd = viewModel::add,
+                modifier = Modifier.sectionRow(order.size, order.size + 1),
+                padding = PaddingValues(start = 18.dp, end = 4.dp),
+            )
         }
         if (state.done.isNotEmpty()) {
             item(key = "done-header") { DoneHeader(state.done.size, showDone, onToggleDone) }
             if (showDone) {
-                items(state.done, key = { "done-" + it.id }) { item ->
+                itemsIndexed(state.done, key = { _, it -> "done-" + it.id }) { index, item ->
                     SwipeableTaskRow(
                         item = item,
                         onToggle = { viewModel.actions.toggle(item) },
@@ -245,7 +251,7 @@ private fun ProjectPage(
                         onClick = { onOpenTask(item.id) },
                         onEdit = { sheet.open(item.id, it) },
                         extras = extras,
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier.animateItem().sectionRow(index, state.done.size),
                     )
                 }
             }
@@ -262,9 +268,9 @@ private fun PageTitle(state: ProjectDetailState, name: String) {
     Column(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         val project = state.project
         if (project != null) {
-            PageIcon(name, project.color.roles(), size = 52.dp)
+            PageIcon(project.id, name, project.color.roles(), size = 64.dp)
         } else {
-            InboxIcon(size = 52.dp)
+            InboxIcon(size = 64.dp)
         }
         Text(name, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
         if (open + done > 0) {
@@ -305,7 +311,7 @@ private fun DoneHeader(count: Int, expanded: Boolean, onToggle: () -> Unit) {
     val persian = LocalUiConfig.current.persian
     val turn by animateFloatAsState(if (expanded) 90f else 0f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "chevron")
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(start = 16.dp, end = 16.dp, top = 16.dp).heightIn(min = 44.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(start = 24.dp, end = 16.dp, top = 16.dp).heightIn(min = 44.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
